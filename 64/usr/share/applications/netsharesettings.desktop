@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Network Share Settings
+GenericName=Network Share Settings
+X-GNOME-FullName=Network Share Settings
+Comment=Set your Network Share Settings
+Exec=gksudo /usr/scripts/cnss-gui
+Icon=network-workgroup
+Terminal=false
+Type=Application
+Categories=System;
+StartupNotify=true
