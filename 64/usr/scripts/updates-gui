@@ -48,8 +48,8 @@ apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,
 if [  -z "$(cat $UPDATES)"  ]; then
    rm $UPDATES
    unset UPDATES
-    zenity --info --window-icon="/usr/share/icons/zenity-llcc.png"  --width=200 --height=90 --title="     Linux Lite Updates" \
-     		--text="\nNo updates available"
+    zenity --info --window-icon="/usr/share/icons/zenity-llcc.png"  --width=180 --height=80 --title="     Linux Lite Updates" \
+     		--text="\nNo updates available."
    exit 0
 fi
 
