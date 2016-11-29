@@ -99,7 +99,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef
          exit 0
     fi
 
-PROCEED=$(zenity --question --title="$APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --text="Updates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
+PROCEED=$(zenity --question --title="     $APPNAME" --window-icon=/usr/share/icons/zenity-llcc.png --text="\nUpdates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
 if [ ${PROCEED} -eq 1 ]; then
    zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
    exit;
