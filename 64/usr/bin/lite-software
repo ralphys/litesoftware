@@ -1,7 +1,8 @@
 #! /bin/bash
 #--------------------------------------------------------------------------------------------------------
 # Name: Linux Lite Additional Software Install
-# Authors: Misko_2083, Jerry Bezencon, gerito1, Johnathan "ShaggyTwoDope" Jenkins, Ralphy
+# Authors: Misko_2083, Jerry Bezencon, gerito1, Johnathan "ShaggyTwoDope" Jenkins
+# Authors: Misko_2083, Jerry Bezencon, gerito1
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
@@ -30,26 +31,35 @@ log(){
 # Log last activities to retrieve errors
 TMP_LOG=/tmp/lite-software.log
 
-# Check if apt-cache was built and ask for update if needed
 prepare(){
-  if zenity --question --width=280 --height=80 --title="     Update software sources" --window-icon=$ic --text="\n<b>We will now update your software sources</b>\n\nClick 'No' to exit now or 'Yes' to continue."; then
-    TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
-    sudo apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
-      | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
-    if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-      zenity --error --title="Error" --text="Updating sources has failed.\n\nRefer to /var/log/lite-software.log\n\nfor more information."
-      log "ERROR: Updating sources has failed."
-      exit 0
-    fi
-    log "INFO: Software sources were updated."
-  else
-    log "INFO: The updating of packages was cancelled by the user"
-    exit
-  fi
+	# Check internet access
+	if eval "sudo -u ${SUDO_USER:-$USER} curl -sk https://www.linuxliteos.com/" >> /dev/null 2>&1; then
+	: # pass
+	else # Prompt ERROR internet connection
+		(zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
+			     --text="\n<b>Your computer does not seem to be connected to the internet</b> \n \nYou won't be able to install applications packages needed to be downloaded from the Internet." --no-wrap)
+		return 
+	fi
+   # Check if apt-cache was built and ask to update    	    	
+ 	if zenity --question --width=400 --height=120 --title="     Update software sources" --window-icon=$ic --text="\n<b>Would you like to update your software sources now?</b>\n\nClick 'No' to continue without updating software sources or 'Yes' to update software sources next. \n \nIt is recommended to always update software sources before installing applications."; then
+		TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
+    		sudo apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
+       		| zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
+    		if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+      			zenity --error --title="          Error" --width=300 --height=90 --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information."
+      			log "ERROR: Updating sources has failed."
+      			next
+    		fi
+    		log "INFO: Software sources were updated."
+  	else
+    		log "INFO: The updating of packages was cancelled by the user"
+    	next
+  	fi
 }
 
 # Set app icon variable
 APPICON=/usr/share/litesoftware/appicons/
+
 #--------------------------------------------------------------------------------------------------------
 # soft_list is the list of package aliases to check/install/remove
 # Consist in a list describing aspect for every package
@@ -154,7 +164,7 @@ install_pkgs(){
     zenity --error --title="Error" --text="Error\n$err_msg"
     return
   else
-    zenity --info --title="Install Complete" --text="The package(s) installed successfully."
+    zenity --info --width=240 --height=80 --title="          Installation Info" --text="\nInstallation successfully completed!"
     log "INFO: Installation was a success."
   fi
 }
@@ -171,7 +181,7 @@ remove_pkgs(){
     zenity --error --title="Error" --text="Error\n$err_msg"
     return
   else
-    zenity --info --title="Removal Complete" --text="The package(s) uninstalled successfully."
+    zenity --info --width=240 --height=80 --title="          Removal Info" --text="\nRemoval successfully completed!"
     log "INFO: Removal was a success."
   fi
 }
@@ -185,18 +195,18 @@ install_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then press the Install button. \n- Sort columns by clicking on column headers. \n- You can select multiple programs to be installed by holding down the Ctrl key or Shift key as you click the desired applications. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, and then holding Shift \n  and clicking the last application, all the applications in between are selected. " \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected.\n " \
       --title="Install Additional Software" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     return
   fi
-
+  
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info  --width=240 --title='Install Additional Software' --text='\nNo application selected for installation.'
+    zenity --info  --width=280 --title='     Install Additional Software' --text='\nNo application was selected for installation.'
     return
   fi
 
@@ -216,7 +226,7 @@ install_menu(){
   done
   IFS=$OIFS
 
-  zenity --question --title="Install Software" --window-icon="${ic}" --text="The following software is selected for installation:\n\n $PKGS_NAMES \n Do you want to proceed?"
+  zenity --question  --width=360 --title="          Install Software" --window-icon="${ic}" --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \nDo you want to proceed with the installation?"
   if [ "$?" -eq "0" ]; then
     install_pkgs PKGS[@]
   else
@@ -241,7 +251,7 @@ remove_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. Sort Categories by clicking on the column.\nYou can select multiple programs to remove by holding down the Ctrl or Shift keys." \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected." \
       --title="Remove Additional Software" --ok-label="Remove" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -252,7 +262,7 @@ remove_menu(){
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info --title='Remove Software' --text='Nothing was selected for removal.'
+    zenity --info --width=260 --title='          Remove Software' --text='\nNo application was selected for removal.'
     return
   fi
 
@@ -271,7 +281,7 @@ remove_menu(){
     PKGS=$PKGS${selection_array[$i]}" "
   done
   IFS=$OIFS
-  zenity --question --title="Remove Software" --window-icon="${ic}" --text="The following software is selected for removal:\n\n $PKGS_NAMES \n Do you want to proceed?"
+  zenity --question --width=360 --title="          Remove Software" --window-icon="${ic}" --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \n Do you want to proceed  with the removal?"
   if [ "$?" -eq "0" ]; then
     remove_pkgs PKGS[@]
   else
