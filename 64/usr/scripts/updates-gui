@@ -36,7 +36,7 @@ zenity --question --width=280 --height=100 --title="          Linux Lite Updates
             rm $UPDATES
             unset UPDATES
             zenity --error \
-            --title="Error" --text="$APPNAME couldn't fetch the package cache information lists."
+            --title="Error" --text="\n$APPNAME Couldn't fetch the package cache information lists."
             exit 1
         fi
 unset APTUPDATE
@@ -49,7 +49,7 @@ if [  -z "$(cat $UPDATES)"  ]; then
    rm $UPDATES
    unset UPDATES
     zenity --info --window-icon="/usr/share/icons/zenity-llcc.png"  --width=180 --height=80 --title="     Linux Lite Updates" \
-     		--text="\nNo updates available."
+        --text="\nNo updates available."
    exit 0
 fi
 
