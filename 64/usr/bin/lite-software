@@ -1,8 +1,7 @@
 #! /bin/bash
 #--------------------------------------------------------------------------------------------------------
 # Name: Linux Lite Additional Software Install
-# Authors: Misko_2083, Jerry Bezencon, gerito1, Johnathan "ShaggyTwoDope" Jenkins
-# Authors: Misko_2083, Jerry Bezencon, gerito1
+# Authors: Misko_2083, Jerry Bezencon, gerito1, Johnathan "ShaggyTwoDope" Jenkins, Ralphy
 # Website: https://www.linuxliteos.com
 #--------------------------------------------------------------------------------------------------------
 
@@ -33,7 +32,7 @@ TMP_LOG=/tmp/lite-software.log
 
 # Check if apt-cache was built and ask for update if needed
 prepare(){
-  if zenity --question --width=280 --height=80 --title="     Lite - Update software sources" --window-icon=$ic --text="\n<b>We will now update your software sources</b>\n\nPress 'No' to exit now or 'Yes' to continue."; then
+  if zenity --question --width=280 --height=80 --title="     Update software sources" --window-icon=$ic --text="\n<b>We will now update your software sources</b>\n\nClick 'No' to exit now or 'Yes' to continue."; then
     TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
     sudo apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
       | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
@@ -51,7 +50,6 @@ prepare(){
 
 # Set app icon variable
 APPICON=/usr/share/litesoftware/appicons/
-
 #--------------------------------------------------------------------------------------------------------
 # soft_list is the list of package aliases to check/install/remove
 # Consist in a list describing aspect for every package
@@ -187,7 +185,7 @@ install_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. Sort Categories by clicking on the column.\nYou can select multiple programs to install by holding down the Ctrl or Shift keys." \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then press the Install button. \n- Sort columns by clicking on column headers. \n- You can select multiple programs to be installed by holding down the Ctrl key or Shift key as you click the desired applications. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, and then holding Shift \n  and clicking the last application, all the applications in between are selected. " \
       --title="Install Additional Software" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -198,7 +196,7 @@ install_menu(){
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info --title='Install Additional Software' --text='Nothing was selected for installation.'
+    zenity --info  --width=240 --title='Install Additional Software' --text='\nNo application selected for installation.'
     return
   fi
 
@@ -286,9 +284,9 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  TASK=$(zenity --width=280 --height=180 --list --radiolist --text="Select a task:" \
+  TASK=$(zenity --width=280 --height=160 --list --radiolist --text="Select a task:" \
     --title="          Lite Software" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
-    --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2 FALSE "Exit" 3)
+    --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
@@ -305,5 +303,4 @@ while (true); do
     esac
   fi
 done
-
 exit 0
