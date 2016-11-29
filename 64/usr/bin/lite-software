@@ -33,7 +33,7 @@ TMP_LOG=/tmp/lite-software.log
 
 # Check if apt-cache was built and ask for update if needed
 prepare(){
-  if zenity --question --title="Update Sources" --window-icon=$ic --text="We will now update your software sources.\n\nClick Yes to continue or No to abort."; then
+  if zenity --question --width=280 --height=80 --title="     Lite - Update software sources" --window-icon=$ic --text="\n<b>We will now update your software sources</b>\n\nPress 'No' to exit now or 'Yes' to continue."; then
     TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
     sudo apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
       | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
@@ -286,8 +286,8 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  TASK=$(zenity --width=250 --height=180 --list --radiolist --text="Select a task:" \
-    --title="Lite Software" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
+  TASK=$(zenity --width=280 --height=180 --list --radiolist --text="Select a task:" \
+    --title="          Lite Software" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
     --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2 FALSE "Exit" 3)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
