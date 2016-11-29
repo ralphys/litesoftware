@@ -24,7 +24,7 @@ UPDATES=$(mktemp /tmp/updateslist.XXXXXX)
 ic="/usr/share/icons/zenity-llcc.png"
 
 # Get list of available updated packages then populate them to /tmp/updateslist
-zenity --question --title="Linux Lite Updates" --window-icon="/usr/share/icons/zenity-llcc.png" --text="We will now fetch the Updates list.\n\nClick Yes to continue or No to abort."
+zenity --question --width=280 --height=90 --title="          Linux Lite Updates" --window-icon="/usr/share/icons/zenity-llcc.png" --text="\n<b>We will now fetch the Updates list</b>\n\nClick 'No' to exit now or 'Yes' to continue."
    if [ "$?" -eq "0" ];then
 
     APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
@@ -51,8 +51,8 @@ if [  -z "$(cat $UPDATES)"  ]; then
 
    rm $UPDATES
    unset UPDATES
-    zenity --info --window-icon="/usr/share/icons/zenity-llcc.png" --title="Linux Lite Updates" \
-      --width=170 --text="No Updates Available"
+    zenity --info --window-icon="/usr/share/icons/zenity-llcc.png"  --width=200 --height=90 --title="     Linux Lite Updates" \
+     		--text="\nNo new updates available"
 
    exit 0
 fi
