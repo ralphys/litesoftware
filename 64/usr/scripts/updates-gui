@@ -2,7 +2,7 @@
 #-----------------------------------------------------------------------------------------
 # Name: Linux Lite Updates
 # Description: A GUI tool to easily install Updates in Linux Lite.
-# Authors: Misko_2083, Jerry Bezencon, gerito1
+# Authors: Misko_2083, Jerry Bezencon, gerito1, Ralphy
 # Website: https://www.linuxliteos.com
 #-----------------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ UPDATES=$(mktemp /tmp/updateslist.XXXXXX)
 ic="/usr/share/icons/zenity-llcc.png"
 
 # Get list of available updated packages then populate them to /tmp/updateslist
-zenity --question --width=280 --height=90 --title="          Linux Lite Updates" --window-icon="/usr/share/icons/zenity-llcc.png" --text="\n<b>We will now fetch the Updates list</b>\n\nClick 'No' to exit now or 'Yes' to continue."
+zenity --question --width=280 --height=100 --title="          Linux Lite Updates" --window-icon="/usr/share/icons/zenity-llcc.png" --text="\n<b>We will now fetch the Updates list</b>\n\nClick 'No' to exit now or 'Yes' to continue."
    if [ "$?" -eq "0" ];then
 
     APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
@@ -49,7 +49,7 @@ if [  -z "$(cat $UPDATES)"  ]; then
    rm $UPDATES
    unset UPDATES
     zenity --info --window-icon="/usr/share/icons/zenity-llcc.png"  --width=200 --height=90 --title="     Linux Lite Updates" \
-     		--text="\nNo new updates available"
+     		--text="\nNo updates available"
    exit 0
 fi
 
