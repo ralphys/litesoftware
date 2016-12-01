@@ -32,7 +32,7 @@ TMP_LOG=/tmp/lite-software.log
 
 prepare(){
   # Check internet access
-  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk https://www.linuxliteos.com/" >> /dev/null 2>&1; then
+  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com/" >> /dev/null 2>&1; then
     : # pass
   else # Prompt ERROR internet connection
     (zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
