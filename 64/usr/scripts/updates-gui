@@ -97,7 +97,9 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef
       else
          rm $UPDATES
          unset UPDATES
-   zenity --error --title="Updates Cancelled" --window-icon="${INSTALL_ICON}" --width=160 --text="Updates Cancelled."
+         zenity --error --title="Updates Cancelled" --window-icon="${INSTALL_ICON}" --width=160 --text="Updates Cancelled."
+         sleep 3
+	      sudo -u ${SUDO_USER:-$USER} notify-send -t 10000 -i /usr/share/icons/Faenza/places/48/distributor-logo-ubuntu.png "Updates Available" "There are updates available for your system. Please run Lite 'Install Updates' again to update."
          exit 0
     fi
 
