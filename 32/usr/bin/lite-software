@@ -32,7 +32,7 @@ TMP_LOG=/tmp/lite-software.log
 
 prepare(){
   # Check internet access
-  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com/" >> /dev/null 2>&1; then
+  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com" >> /dev/null 2>&1; then
     : # pass
   else # Prompt ERROR internet connection
     (zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
@@ -40,10 +40,10 @@ prepare(){
     return 
   fi
    # Check if apt-cache was built and ask to update           
-  if zenity --question --width=400 --height=120 --title="     Update software sources" --text="\n<b>Would you like to update your software sources now?</b>\n\nClick 'No' to continue without updating software sources or 'Yes' to update software sources next. \n \nIt is recommended to always update software sources before installing applications."; then
+  if zenity --question --width=400 --height=120 --title="     Update software sources" --window-icon=$ic --text="\n<b>Would you like to update your software sources now?</b>\n\nClick 'No' to continue without updating software sources or 'Yes' to update software sources next. \n \nIt is recommended to always update software sources before installing applications."; then
       TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
       sudo apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
-      | zenity --progress --text="Updating package lists..." --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
+      | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
         zenity --error --title="          Error" --width=300 --height=90 --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information."
         log "ERROR: Updating sources has failed."
@@ -194,7 +194,7 @@ install_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. \n\n- <b>Sort</b> columns by clicking on column headers. \n- <b>Ctrl key</b> - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- <b>Shift key</b> - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding <b>Shift</b> \n  and clicking the last application you want from the list, all the applications in between will be selected.\n " \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected.\n " \
       --title="Install Additional Software" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -242,6 +242,7 @@ remove_menu(){
   selection=$(for element in ${soft_list[*]}
     do
       pkg_status=$element[3]
+
       #Only list Installed applications
       if [ "${!pkg_status}" == "Not Installed" ]; then
         continue;
@@ -249,7 +250,7 @@ remove_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. \n\n- <b>Sort</b> columns by clicking on column headers. \n- <b>Ctrl key</b> - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- <b>Shift key</b> - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding <b>Shift</b> \n  and clicking the last application you want from the list, all the applications in between will be selected." \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected." \
       --title="Remove Additional Software" --ok-label="Remove" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -292,8 +293,7 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  ic="/usr/share/icons/zenity-llcc.png"
-  TASK=$(zenity --width=280 --height=160 --list --radiolist --window-icon=$ic --text="Select a task:" \
+  TASK=$(zenity --width=280 --height=160 --list --radiolist --text="Select a task:" \
     --title="          Lite Software" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
     --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then

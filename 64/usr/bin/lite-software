@@ -32,7 +32,7 @@ TMP_LOG=/tmp/lite-software.log
 
 prepare(){
   # Check internet access
-  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com/" >> /dev/null 2>&1; then
+  if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com" >> /dev/null 2>&1; then
     : # pass
   else # Prompt ERROR internet connection
     (zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
@@ -194,7 +194,7 @@ install_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. \n\n- <b>Sort</b> columns by clicking on column headers. \n- <b>Ctrl key</b> - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- <b>Shift key</b> - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding <b>Shift</b> \n  and clicking the last application you want from the list, all the applications in between will be selected.\n " \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to install, then click the Install button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected.\n " \
       --title="Install Additional Software" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -249,7 +249,7 @@ remove_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. \n\n- <b>Sort</b> columns by clicking on column headers. \n- <b>Ctrl key</b> - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- <b>Shift key</b> - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding <b>Shift</b> \n  and clicking the last application you want from the list, all the applications in between will be selected." \
+      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program you wish to remove, then click the Remove button. \n- Sort columns by clicking on column headers. \n- Ctrl key - allows you to click and select multiple applications that are <b>anywhere</b> on the list, not necessarily next to each other. \n- Shift key - allows you to select a group of applications that are <b>contiguous</b> (next to each other) by clicking one application, then holding Shift \n  and clicking the last application you want from the list; all the applications in between will be selected." \
       --title="Remove Additional Software" --ok-label="Remove" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
