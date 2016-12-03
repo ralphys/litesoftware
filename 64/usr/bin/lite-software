@@ -1,6 +1,6 @@
 #! /bin/bash
 #--------------------------------------------------------------------------------------------------------
-# Name: Linux Lite Additional Software Install
+# Name: Linux Lite - Lite Software
 # Architecture: amd64
 # Authors: Misko_2083, Jerry Bezencon, gerito1, Johnathan "ShaggyTwoDope" Jenkins, Ralphy
 # Website: https://www.linuxliteos.com
@@ -104,22 +104,22 @@ calibre=("$APPICON/calibre.png" "Calibre" "Office" "" "A free and open source e-
 cherrytree=("$APPICON/cherrytree.png" "Cherrytree" "Accessories" "" "A hierarchical note taking application" "cherrytree" "" )
 chromiumbr=("$APPICON/chromium.png" "Chromium Web Browser" "Internet" "" "Open-source alternative to the Google Chrome web browser" "chromium-browser" "" )
 dropbox=("$APPICON/dropbox.png" "Dropbox" "Internet" "" "A popular cloud storage application" "dropbox thunar-dropbox-plugin" "" )
-gamespack=("$APPICON/gamespack.png" "Games Pack" "Games" "" "Provides with Solitaire, Mahjongg, Mines and Hearts games" "aisleriot gnome-mahjongg gnome-mines gnome-hearts" "" )
+gamespack=("$APPICON/gamespack.png" "Games Pack" "Games" "" "Provides - Solitaire, Mahjongg, Mines and Hearts games" "aisleriot gnome-mahjongg gnome-mines gnome-hearts" "" )
 idevices=("$APPICON/gtkpod.png" "iDevices Manager" "Multimedia" "" "Manage your iDevices with Gtkpod" "gtkpod" "" )
 imessenger=("$APPICON/pidgin.png" "Instant Messenger" "Internet" "" "Pidgin, a multi-protocol Instant Messenging client" "pidgin" "" )
 kodi=("$APPICON/kodi.png" "Kodi" "Multimedia" "" "The Kodi Media Center (formerly known as XBMC)" "kodi" "" )
 clementine=("$APPICON/clementine.png" "Music Player" "Multimedia" "" "Clementine is a modern music player and library organizer" "clementine" "")
-passmgr=("$APPICON/keepassx.png" "Password Manager" "Accessories" "" "KeePassX, an excellent password manager" "keepassx" "" )
+passmgr=("$APPICON/keepassx.png" "Password Manager" "Accessories" "" "KeePassX, a full featured password manager" "keepassx" "" )
 pinta=("$APPICON/pinta.png" "Pinta" "Graphics" "" "An easy to use drawing program similar to Paint.Net" "pinta" "" )
 playonlinux=("$APPICON/playonlinux.png" "PlayOnLinux" "Cross Platform" "" "Use numerous games and apps designed to run with Windows" "playonlinux" "" )
 remote=("$APPICON/remmina.png" "Remote Desktop Software" "Internet" "" "Remmina Remote Desktop Client for Windows (RDP) and VNC Servers" "remmina" "" )
-extras=("$APPICON/extras.png" "Restricted Extras" "Multimedia" "" "Additional codecs and useful file formats" "ubuntu-restricted-extras" "libavcodec-extra" )
+extras=("$APPICON/extras.png" "Restricted Extras" "Multimedia" "" "Additional codecs and useful file formats (highly recommended)" "ubuntu-restricted-extras" "libavcodec-extra" )
 skype=("$APPICON/skype.png" "Skype" "Internet" "" "A popular audio and video chat application" "skype-bin" "skype" )
-spotify=("$APPICON/spotify.png" "Spotify" "Multimedia" "" "Spotify is a digital music service" "spotify-client" "" )
-steam=("$APPICON/steam.png" "Steam" "Games" "" "Steam is a cross platform gaming client" "steam-launcher" "" )
-teamviewer=("$APPICON/teamviewer.png" "Teamviewer" "Internet" "" "Teamviewer Remote Desktop Support software" "teamviewer:i386" "" )
+spotify=("$APPICON/spotify.png" "Spotify" "Multimedia" "" "A digital music service" "spotify-client" "" )
+steam=("$APPICON/steam.png" "Steam" "Games" "" "A cross platform gaming client" "steam-launcher" "" )
+teamviewer=("$APPICON/teamviewer.png" "Teamviewer" "Internet" "" "Remote Desktop Support software" "teamviewer:i386" "" )
 torrent=("$APPICON/deluge.png" "Torrent Software" "Internet" "" "Deluge Torrent client software" "deluge deluge-common" "" )
-tor=("$APPICON/tor.png" "Tor Web Browser" "Internet" "" "Tor Web Browser a privacy respecting web browser" "tor-web-browser" "" )
+tor=("$APPICON/tor.png" "Tor Web Browser" "Internet" "" "A privacy respecting web browser" "tor-web-browser" "" )
 videoedit=("$APPICON/openshot.png" "Video Editing Software" "Multimedia" "" "Openshot, a simple to use yet powerful video editor for linux" "openshot blender imagemagick" "")
 vbox=("$APPICON/virtualbox.png" "VirtualBox" "System" "" "Install other operating systems like Windows from within Linux Lite" "virtualbox" "" )
 weather=("$APPICON/weather.png" "Weather Monitor" "System Tray" "" "A Weather Monitor Plugin for your tray" "xfce4-weather-plugin" "" )
@@ -196,7 +196,7 @@ install_menu(){
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want then click the <b>Install</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
-      --title="Install Additional Software" --ok-label="Install" --hide-column=6,7 )
+      --title="Install Software" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -206,7 +206,7 @@ install_menu(){
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info  --width=280 --title='     Install Additional Software' --text='\nNo application was selected for installation.'
+    zenity --info  --width=280 --title='     Install Software' --text='\nNo application was selected for installation.'
     return
   fi
 
@@ -252,7 +252,7 @@ remove_menu(){
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
-      --title="Remove Additional Software" --ok-label="Remove" --hide-column=6,7 )
+      --title="Remove Software" --ok-label="Remove" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
