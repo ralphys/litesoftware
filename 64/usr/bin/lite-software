@@ -40,7 +40,7 @@ prepare(){
     : # pass
   else # Prompt ERROR internet connection
     (zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
-            --text="\n<b>Your computer does not seem to be connected to the internet</b> \n \nYou won't be able to install applications packages needed to be downloaded from the Internet." --no-wrap)
+            --text="\n<b>Your computer does not seem to be connected to the Internet</b> \n \nYou need to be connected to the Internet to download and install applications." --no-wrap)
     return 
   fi
    # Check if apt-cache was built and ask to update
@@ -300,7 +300,7 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  TASK=$(zenity --width=280 --height=160 --list --radiolist --window-icon=$ic --text="Select a task:" \
+  TASK=$(zenity --width=280 --height=160 --list --radiolist --window-icon=$ic --text="Select a Task:" \
     --title="   Lite Software" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
     --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
