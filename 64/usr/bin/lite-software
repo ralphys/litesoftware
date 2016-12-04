@@ -39,7 +39,7 @@ prepare(){
   if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com" >> /dev/null 2>&1; then
     : # pass
   else # Prompt ERROR internet connection
-    (zenity --info --ok-label="Got it!" --title="No Internet connection detected..." \
+    (zenity --info --ok-label="Got it!" --title="No Internet connection detected" \
             --text="\n<b>Your computer does not seem to be connected to the Internet</b> \n \nYou need to be connected to the Internet to download and install applications." --no-wrap)
     return 
   fi
