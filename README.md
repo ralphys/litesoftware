@@ -3,7 +3,7 @@ Lite Software
 
 A gui tool to easily install and remove popular software.
 
-![](http://i.imgur.com/Wcd3QKk.png)
+![](http://i.imgur.com/ImRUGkr.png)
 
 ## License ![License](https://img.shields.io/badge/license-GPLv2-green.svg)
 
