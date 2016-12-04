@@ -169,7 +169,7 @@ install_pkgs(){
     zenity --error --title="  Error" --text="Error\n$err_msg"
     return
   else
-    zenity --info --width=240 --height=80 --title="   Installation Info" --text="\nInstallation successfully completed!"
+    zenity --info --width=240 --height=80 --title="   Installation Information" --text="\nInstallation successfully completed!"
     log "INFO: Installation was a success."
   fi
 }
@@ -186,7 +186,7 @@ remove_pkgs(){
     zenity --error --title="Error" --text="Error\n$err_msg"
     return
   else
-    zenity --info --width=240 --height=80 --title="   Removal Info" --text="\nRemoval successfully completed!"
+    zenity --info --width=240 --height=80 --title="   Removal Information" --text="\nRemoval successfully completed!"
     log "INFO: Removal was a success."
   fi
 }
