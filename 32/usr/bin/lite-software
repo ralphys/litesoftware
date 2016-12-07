@@ -221,7 +221,6 @@ install_menu(){
     continue
   fi
   
-
   # Split selection
   OIFS=$IFS
   IFS='|'
