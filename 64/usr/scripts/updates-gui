@@ -34,7 +34,7 @@ ic="/usr/share/icons/zenity-llcc.png"
 
 # Get list of available updated packages then populate them to /tmp/updateslist
 zenity --question --width=290 --height=100 --ok-label="Continue" --cancel-label="Quit" --title="  Linux Lite Updates" --window-icon=$ic \
-       --text="\n<b>We will now fetch the Updates list</b>\n\nClick 'Quit' to exit now or 'Continue' to proceed."
+       --text="\n<b>We will now fetch the Updates list</b>\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed."
    if [ "$?" -eq "0" ];then
 
     APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated

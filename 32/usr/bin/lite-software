@@ -45,7 +45,7 @@ prepare(){
   fi
    # Check if apt-cache was built and ask to update
   if zenity --question --width=360 --height=120 --window-icon=$ic --title=" Update Software Sources" \
-            --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \n\nClick 'No' to continue without updating or 'Yes' to update software sources next."; then
+            --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \n\nClick <b>No</b> to continue without updating or <b>Yes</b> to update software sources next."; then
       TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
       apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
       | zenity --progress --text="Updating package lists..." --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
