@@ -241,8 +241,9 @@ install_menu(){
          --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \nDo you want to proceed with the installation?"
   if [ "$?" -eq "0" ]; then
     install_pkgs PKGS[@]
-  else
     return
+  else
+    continue
   fi
   done
 }
@@ -296,8 +297,9 @@ remove_menu(){
          --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \n Do you want to proceed  with the removal?"
   if [ "$?" -eq "0" ]; then
     remove_pkgs PKGS[@]
-  else
     return
+  else
+    continue
   fi
   done
 }
