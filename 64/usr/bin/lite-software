@@ -44,8 +44,8 @@ prepare(){
     return 
   fi
    # Check if apt-cache was built and ask to update
-  if zenity --question --width=400 --height=120 --window-icon=$ic --title=" Update Software Sources" \
-            --text="\n<b>Would you like to update your software sources now?</b>\n\nClick <b>No</b> to continue without updating software sources or <b>Yes</b> to update software sources. \n \nIt is recommended to always update software sources before installing applications."; then
+  if zenity --question --width=360 --height=120 --window-icon=$ic --title=" Update Software Sources" \
+            --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \n\nClick 'No' to continue without updating or 'Yes' to update software sources next."; then
       TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
       apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",$0 }; fflush(stdout)}' \
       | zenity --progress --text="Updating package lists..." --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
@@ -193,16 +193,21 @@ remove_pkgs(){
 
 # The installation menu
 install_menu(){
-  
+  while (true); do
   check_installed
 
   selection=$(for element in ${soft_list[*]}
     do
+      pkg_status=$element[3]
+      #Only list Not Installed applications
+      if [ "${!pkg_status}" == "Installed" ]; then
+        continue;
+      fi
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want then click the <b>Install</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
-      --title=" Install Software" --ok-label="Install" --hide-column=6,7 )
+      --title=" Install Software" --cancel-label="Back to Task Selector" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -213,9 +218,9 @@ install_menu(){
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info  --width=280 --title='  Install Software' --text='\nNo application was selected for installation.'
-    return
+    continue
   fi
-
+  
   # Split selection
   OIFS=$IFS
   IFS='|'
@@ -239,11 +244,12 @@ install_menu(){
   else
     return
   fi
+  done
 }
 
 # The installation menu
 remove_menu(){
-
+  while (true); do
   check_installed
 
   selection=$(for element in ${soft_list[*]}
@@ -257,7 +263,7 @@ remove_menu(){
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
-      --title="Remove Software" --ok-label="Remove" --hide-column=6,7 )
+      --title="Remove Software" --cancel-label="Back to Task Selector" --ok-label="Remove" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
@@ -268,7 +274,7 @@ remove_menu(){
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --width=260 --title='   Remove Software' --text='\nNo application was selected for removal.'
-    return
+    continue
   fi
 
   # Split selection
@@ -293,6 +299,7 @@ remove_menu(){
   else
     return
   fi
+  done
 }
 
 # We begin here
