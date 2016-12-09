@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Support
+GenericName=Support
+X-GNOME-FullName=Support
+Comment=Get Support online for Linux Lite
+Exec=exo-open "http://www.linuxliteos.com/forums/"
+Icon=menu-icon
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Network;WebBrowser;
+StartupNotify=true
