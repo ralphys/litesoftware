@@ -19,93 +19,86 @@ fi
 
 # Check Internet access
 if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com" >> /dev/null 2>&1; then
-  : # pass
- else # Prompt ERROR internet connection
+  :  # continue - internet connection check passed 
+else # Prompt ERROR internet connection check failed and exit
     (zenity --info --width=320 --height=120 --ok-label="Got it!" --title="  Lite Updates - No Internet connection detected..." \
             --text="\n<b>Your computer does not seem to be connected to the internet</b> \n \nLinux Lite cannot check for updates. \nPlease check your Internet connection and try again." --no-wrap)
         exit 0
 fi
 
-# Updates log variable
-UPDATES=$(mktemp /tmp/updateslist.XXXXXX)
-
-# Linux Lite default dialog icon
-ic="/usr/share/icons/zenity-llcc.png"
+APPNAME="Linux Lite Updates"                # Application name variable
+ic="/usr/share/icons/zenity-llcc.png"       # Linux Lite icon variable
+UPDATES=$(mktemp /tmp/updateslist.XXXXXX)   # Updates log variable
 
 # Get list of available updated packages then populate them to /tmp/updateslist
-zenity --question --width=290 --height=100 --ok-label="Continue" --cancel-label="Quit" --title="  Linux Lite Updates" --window-icon=$ic \
-       --text="\n<b>We will now fetch the Updates list</b>\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed."
-   if [ "$?" -eq "0" ];then
-
-    APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
-    apt-get update 2>&1 | awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
-      | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --auto-close --width=600
-
-        if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-            unset APTUPDATE
-            rm $UPDATES
-            unset UPDATES
-            zenity --error --width=280 --height=100 --title=" Error" \
-                   --text="\n$APPNAME Couldn't fetch the package cache information lists."
-            exit 1
-        fi
-unset APTUPDATE
+zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Quit" --title="  $APPNAME" \
+       --text="\n$APPNAME will now fetch the Updates list\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed."
+  
+  if [ "$?" -eq "0" ];then
+  APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
+  apt-get update 2>&1 | awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
+    | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --no-cancel --pulsate --auto-close --width=600   
+      if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+          unset APTUPDATE
+          rm $UPDATES
+          unset UPDATES
+          zenity --error --width=290 --height=60 --title="  $APPNAME - Error" \
+                 --text="\n$APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!"
+          exit 1
+      fi
+  unset APTUPDATE
 
 # Creates a list in /tmp/updateslist
-apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,\+]+)\s\[([\w,\-,\d,\.,~,:,\+]+)\]\s\(([\w,\-,\d,\.,~,:,\+]+)\)? /i) {print "Name: $1 INSTALLED: $2 AVAILABLE: $3\n"}' | awk '{print NR,":\t"$0}' | tee $UPDATES
+  apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,\+]+)\s\[([\w,\-,\d,\.,~,:,\+]+)\]\s\(([\w,\-,\d,\.,~,:,\+]+)\)? /i) {print "Name: $1 INSTALLED: $2 AVAILABLE: $3\n"}' | awk '{print NR,":\t"$0}' | tee $UPDATES
 
-# Check if any updates are available, if there are none, script pops up dialog box saying 'No Updates Available', removes /tmp/updateslist.XXXXXX
-if [  -z "$(cat $UPDATES)"  ]; then
-   rm $UPDATES
-   unset UPDATES
-    zenity --info --window-icon=$ic  --width=180 --height=80 --title="  Linux Lite Updates" \
+# Check if updates are available, if there are none, remove /tmp/updateslist.XXXXXX and pop up a 'No Updates Available' dialog
+  if [  -z "$(cat $UPDATES)"  ]; then
+    rm $UPDATES
+    unset UPDATES
+    zenity --info --window-icon=$ic  --width=180 --height=80 --title="  $APPNAME" \
            --text="\nNo updates available."
-   exit 0
-fi
+    exit 0
+  fi
 
 # Insert text into  /tmp/updateslist.XXXXXX
-sed -i -e '1 i\       List of available Updates' -e '1 i\       -----------------------------------' -e '1 i\       Click "Update" to install the updates listed below or Cancel to stop the update process\n'  $UPDATES
+  sed -i -e '1 i\       List of available Updates' -e '1 i\       -----------------------------------' -e '1 i\       Click "Update Now" to install the updates listed below or "Cancel" to exit now\n'  $UPDATES
 
 # Erase existing available info
-dpkg --clear-avail
+  dpkg --clear-avail
   else
-       rm $UPDATES
-       unset UPDATES
-       exit 0
+    rm $UPDATES
+    unset UPDATES
+    exit 0
   fi
 
 # Call the zenity dialog to show update list
-zenity --text-info --ok-label="Update" --cancel-label="Cancel" --title="Linux Lite Updates" --width=650 --height=340 --filename="$UPDATES"
+zenity --text-info --ok-label="Update Now" --cancel-label="Cancel" --title="  $APPNAME" --width=650 --height=340 --filename="$UPDATES"
       if [ "$?" -eq "0" ];then
-      # Continue script if no halt
-        INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
-        APPNAME="Linux Lite Updates"
-                 # Remove tmp file and unset variable
-                 rm $UPDATES
-                 unset UPDATES
+        # Continue script if no halt and Remove tmp file and unset variables
+        rm $UPDATES
+        unset UPDATES
+
 #Begin upgrade
 DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y  2>&1 | tee /var/log/llupdates.log | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", substr($0, 0, 128); fflush(stdout)}' \
     | ( zenity --window-icon=$ic --progress --width=600 --text="Downloading package(s)...\nThis may take a while." --title="Downloading - please wait..." --percentage=0 --auto-close ; zenity --progress --window-icon=$ic --width=600 --text="Installing and configuring packages...\nThis may take a while." --title="Installing - please wait..."  --pulsate --auto-close )
 
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-         zenity --error \
-         --title="Error" --text="$APPNAME have failed.\n\nRefer to /var/log/llupdates.log\n\nfor more information."
+         zenity --error --width=240 --height=60 --title="  $APPNAME - Error" \
+                --text="$APPNAME have failed. For more information refer to: \n \n/var/log/llupdates.log"
          exit 0
       fi
-
       # Halt updates script if user selects Cancel
       else
          rm $UPDATES
          unset UPDATES
-         zenity --warning --title=" Updates Cancelled" --window-icon="${INSTALL_ICON}" --width=220 --text="\nUpdates have been cancelled."
+         zenity --info --width=200 --timeout=3 --window-icon="$ic" --title="  $APPNAME" --text="\nUpdates have been canceled."
          exit 0
     fi
 
-PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon=$ic --text="\nUpdates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
-if [ ${PROCEED} -eq 1 ]; then
-   zenity --info --title="$APPNAME" --window-icon="${INSTALL_ICON}" --text="$APPNAME Complete."
-   exit;
-else
-   zenity --text-info --ok-label="Quit" --cancel-label="Cancel" --title="Updates Log" --width=650 --height=340 --filename="/var/log/llupdates.log"
-fi
+    PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon="$ic" --text="\nUpdates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
+    if [ ${PROCEED} -eq 1 ]; then
+      zenity --info --width=280 --height=60 --timeout=3 --title="  $APPNAME" --window-icon="$ic" --text="\n$APPNAME successfully completed!"
+    else
+      zenity --text-info --ok-label="Quit" --cancel-label="Cancel" --title=" $APPNAME - Log" --width=650 --height=340 --filename="/var/log/llupdates.log"
+    fi
 exit 0
