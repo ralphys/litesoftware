@@ -53,12 +53,10 @@ prepare(){
         zenity --error --width=300 --height=90 --title="    Error" \
                --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information."
         log "ERROR: Updating sources has failed."
-        next
       fi
         log "INFO: Software sources were updated."
       else
-        log "INFO: The updating of packages was cancelled by the user"
-        next
+        log "INFO: The updating of packages was canceled by the user"
   fi
 }
 
@@ -238,7 +236,7 @@ install_menu(){
   IFS=$OIFS
 
   zenity --question --width=360 --window-icon="${ic}" --title="  Install Software" \
-         --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \nDo you want to proceed with the installation?"
+         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\nDo you want to proceed with the installation?"
   if [ "$?" -eq "0" ]; then
     install_pkgs PKGS[@]
     return
@@ -266,7 +264,7 @@ remove_menu(){
       --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
       --title="Remove Software" --cancel-label="Back to Task Selector" --ok-label="Remove" --hide-column=6,7 )
 
-  # If Cancel is clicked then return to main loop
+  # if cancel is clicked then return to main loop
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     return
   fi
@@ -294,7 +292,7 @@ remove_menu(){
   done
   IFS=$OIFS
   zenity --question --width=360 --window-icon="${ic}" --title="   Remove Software" \
-         --text="\n<b>The following software has been selected</b>:\n\n $PKGS_NAMES \n Do you want to proceed  with the removal?"
+         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\n Do you want to proceed  with the removal?"
   if [ "$?" -eq "0" ]; then
     remove_pkgs PKGS[@]
     return
