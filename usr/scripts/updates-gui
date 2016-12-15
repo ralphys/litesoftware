@@ -42,8 +42,14 @@ zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continu
           unset APTUPDATE
           rm $UPDATES
           unset UPDATES
-          zenity --error --width=290 --height=60 --title="  $APPNAME - Error" \
-                 --text="\n$APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!"
+          zenity --info --icon-name=error --width=290 --height=60 --title="  $APPNAME - Error" \
+                 --text="\n$APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!" #; answer=$?
+                #if [ "$answer" -eq "0" ]; then
+                #   zenity --info --width=290 --height=60 --title="  $APPNAME - FIX IT" \
+                #          --text="\n FIX IT FIX IT FIX IT"
+                #else
+                #  :
+               #fi
           exit 1
       fi
   unset APTUPDATE
@@ -51,12 +57,12 @@ zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continu
 # Creates a list in /tmp/updateslist
   apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,\+]+)\s\[([\w,\-,\d,\.,~,:,\+]+)\]\s\(([\w,\-,\d,\.,~,:,\+]+)\)? /i) {print "Name: $1 INSTALLED: $2 AVAILABLE: $3\n"}' | awk '{print NR,":\t"$0}' | tee $UPDATES
 
-# Check if updates are available, if there are none, remove /tmp/updateslist.XXXXXX and pop up a 'No Updates Available' dialog
+# Check if updates are available, if there are none, remove /tmp/updateslist.XXXXXX and pop up a 'your system is up-to-date. Available' dialog
   if [  -z "$(cat $UPDATES)"  ]; then
     rm $UPDATES
     unset UPDATES
-    zenity --info --window-icon=$ic  --width=180 --height=80 --title="  $APPNAME" \
-           --text="\nNo updates available."
+    zenity --info --window-icon=$ic  --width=180 --height=60 --title="  $APPNAME" \
+           --text="\nYour system is up to date."
     exit 0
   fi
 
