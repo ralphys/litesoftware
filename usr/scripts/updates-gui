@@ -42,14 +42,8 @@ zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continu
           unset APTUPDATE
           rm $UPDATES
           unset UPDATES
-          zenity --info --icon-name=error --width=290 --height=60 --title="  $APPNAME - Error" \
-                 --text="\n$APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!" #; answer=$?
-                #if [ "$answer" -eq "0" ]; then
-                #   zenity --info --width=290 --height=60 --title="  $APPNAME - FIX IT" \
-                #          --text="\n FIX IT FIX IT FIX IT"
-                #else
-                #  :
-               #fi
+          zenity --error --width=290 --height=60 --title="  $APPNAME - Error" \
+                 --text="\n$APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!"
           exit 1
       fi
   unset APTUPDATE
@@ -101,10 +95,18 @@ DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o 
          exit 0
     fi
 
-    PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon="$ic" --text="\nUpdates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
-    if [ ${PROCEED} -eq 1 ]; then
-      zenity --info --width=280 --height=60 --timeout=3 --title="  $APPNAME" --window-icon="$ic" --text="\n$APPNAME successfully completed!"
+    PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon="$ic" --text="\n$APPNAME completed successfully!\n\nWould you like to view the $APPNAME log?"; echo $?)
+    if [ ${PROCEED} -eq 1 ]; then 
+        continue
     else
       zenity --text-info --ok-label="Quit" --cancel-label="Cancel" --title=" $APPNAME - Log" --width=650 --height=340 --filename="/var/log/llupdates.log"
     fi
+    if [ -e /var/run/reboot-required ]; then
+        zenity --question --ok-label="Reboot now !" --cancel-label="Continue using my system" --title=" $APPNAME - Reboot required" --width=300 --height=100 \
+               --text="\nSome recent updates requires rebooting the system for changes to take effect.\n\n          Would you like to reboot now?"
+            if [ "$?" -eq "0" ]; then 
+                reboot
+            else :
+            fi
+    fi        
 exit 0
