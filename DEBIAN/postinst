@@ -13,9 +13,17 @@ if [ -s "$FILE" ]; then
 fi
 # File ownership
 chown root:root /usr/scripts/systemreport
-chown root:root /usr/share/applications/createsysreport.desktop
+chown root:root /usr/share/applications/sysreport.desktop
 chown root:root /usr/scripts/updates-gui
+chown root:root /usr/bin/lite-software
+chown root:root /usr/share/applications/lite-software.desktop
 # File permissions
 chmod 755 /usr/scripts/systemreport
-chmod 644 /usr/share/applications/createsysreport.desktop
+chmod 644 /usr/share/applications/sysreport.desktop
 chmod 755 /usr/scripts/updates-gui
+chmod 755 /usr/bin/lite-software
+chmod 644 /usr/share/applications/lite-software.desktop
+
+# Remove old files if exist
+[ -e /usr/share/applications/createsysreport.desktop ] && rm -f /usr/share/applications/createsysreport.desktop
+[ -e /usr/share/applications/litesoftware.desktop ] && rm -f /usr/share/applications/litesoftware.desktop
