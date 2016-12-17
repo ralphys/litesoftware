@@ -247,7 +247,7 @@ if zenity --question --icon-name="info" --title="View System Report" --text="Cre
          exit
       else
          # Save report
-         szSavePath=$(zenity --file-selection --filename=systeminfo-"${DATE}".txt --file-filter='*.txt' --file-filter='All files | *' --save --confirm-overwrite)
+         szSavePath=$(zenity --title="    Save System Report" --width=550 --height=380 --file-selection --filename=systeminfo-"${DATE}".txt --file-filter='*.txt' --file-filter='All files | *' --save --confirm-overwrite)
          sudo -u ${SUDO_USER:-$USER} cp /tmp/systeminfo-"${DATE}".txt $szSavePath 
          rm -f /tmp/systeminfo-"${DATE}".txt
       fi

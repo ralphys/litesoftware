@@ -11,7 +11,7 @@ ic="/usr/share/icons/zenity-llcc.png"
 
 while (true); do
 # Main window dialogue.
-zenity --question --icon-name="info" --window-icon="$ic" --ok-label="Enable Auto Login" --cancel-label="Quit" --width="400" --height=60 --title="$APPNAME" \
+zenity --question --icon-name="info" --window-icon="$ic" --ok-label="Enable Auto Login" --cancel-label="Quit" --width="400" --height="60" --title="$APPNAME" \
        --text="\n                       <b>You are about to Enable Auto Login</b>\n \
 
 Next time your computer is restarted you will be automatically signed in. \n \
@@ -26,10 +26,10 @@ if [ "$?" -eq "0" ]; then
 
 Please enter your password to continue, or press Cancel to exit now.' "sed -i "s/autologin-user=linux/autologin-user=$USER/g" /etc/lightdm/lightdm.conf"
         if [ "${PIPESTATUS[0]}" -eq "0" ]; then
-                zenity --info --title="$APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
+                zenity --info --width="200" --height=40 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
                 exit 0
         else
-                zenity --error --width="200" --title="$APPNAME - Error" --text="\nAuto Login could not be enabled."
+                zenity --error --width="200" --height="40" --title="$APPNAME - Error" --text="\nAuto Login could not be enabled."
                 continue
         fi
 else
