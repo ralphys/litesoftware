@@ -11,7 +11,10 @@ DATE=$(date +"%A-%d-%B-%Y-%T")
 if [ $EUID -ne 0 ]; then
    zenity --question  --width=340 --title="   Create System Report" --text="System Report will collect your system information.\n\nClick <b>Cancel</b> to exit now or <b>Create Report</b> to proceed."  --ok-label="Create Report" --cancel-label="Cancel"
    case $? in
-      0) gksu bash $0
+      0) gksu --message '
+   <b>Your password is required to Create System Report</b>
+   
+Please enter your password to continue, or press Cancel to exit now.' "bash $0"
          exit
          ;;
       1) exit
