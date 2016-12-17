@@ -1,17 +1,22 @@
 #!/bin/bash
 # Linux Lite System Information Report Tool for Ubuntu based systems.
 # Dependencies - lshw, dmidecode, hdparm
-# Developer - Misko_2083, Jerry Bezencon, Sysdrum
+# Developer - Misko_2083, Jerry Bezencon, Sysdrum, Ralphy
 # Creation Date - 30th November, 2013 Revision Date - 6th December 2014
 # Website - http://www.linuxliteos.com
 
 DATE=$(date +"%A-%d-%B-%Y-%T")
-rm -rf /tmp/systeminfo*
-rm -rf ~/systeminfo*
-rm -rf ~/Desktop/systeminfo*
 
-# Script start
-if zenity --question --title="Create System Report" --text="System Report needs to collect information.\n\nClick Create Report to proceed or Cancel to exit."  --ok-label="Create Report" --cancel-label="Cancel" --width=400;  then
+# Script start - Ask for elevation, else exit
+if [ $EUID -ne 0 ]; then
+   zenity --question  --width=340 --title="   Create System Report" --text="System Report will collect your system information.\n\nClick <b>Cancel</b> to exit now or <b>Create Report</b> to proceed."  --ok-label="Create Report" --cancel-label="Cancel"
+   case $? in
+      0) gksu bash $0
+         exit
+         ;;
+      1) exit
+   esac
+fi
 
 # Create file and insert date
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
@@ -23,12 +28,12 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 (
 echo "1"
-echo "#This Report may take a while to generate..."
+echo "#The Report may take a while to generate. Please wait..."
 sleep 2
 
 echo "5"
 echo "#Collecting Bios & Motherboard Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Bios & Motherboard Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -47,7 +52,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "10"
 echo "#Collecting CPU Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "CPU Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -60,7 +65,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "17"
 echo "#Collecting Memory Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Memory Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -79,7 +84,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "25"
 echo "#Collecting Graphics Chip Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Graphics Chip Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -91,7 +96,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "40"
 echo "#Collecting Sound Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Sound Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -102,7 +107,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "45"
 echo "#Collecting Hard Drive/SSD Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Hard Drive/SSD Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -129,7 +134,7 @@ sudo hdparm -i /dev/sdc >> /tmp/systeminfo-"${DATE}".txt
 
 echo "50"
 echo "#Collecting Groups Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Groups Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -140,7 +145,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "55"
 echo "#Collecting PCI Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "PCI Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -151,7 +156,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "60"
 echo "#Collecting USB Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "USB Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -162,7 +167,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "65"
 echo "#Collecting Kernel Modules Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Kernel Modules Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -173,7 +178,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "70"
 echo "#Collecting Kernel & OS Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Kernel & Operating System Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -191,7 +196,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "75"
 echo "#Collecting Network Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Network Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -205,7 +210,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "80"
 echo "#Collecting Environment Variables..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Environment Variables Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -216,7 +221,7 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 
 echo "85"
 echo "#Collecting Software Information..."
-sleep 1
+sleep .5
 
 echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
 echo "Software Installed Information" >> /tmp/systeminfo-"${DATE}".txt
@@ -233,46 +238,21 @@ echo "" >> /tmp/systeminfo-"${DATE}".txt
 echo "#Done"
 echo "100"
 
-) | zenity --progress --auto-close --title="Collecting System Information" --no-cancel --width=325
+) | zenity --progress --auto-close --title="Collecting System Information" --no-cancel --width=345
 
-else
-         exit
-fi
-
-# Prompt user to open report
-if zenity --question --title="View System Report" --text="Create System Report has collected the required system data.\n\nClick View Report to see the report or Cancel to exit." --ok-label="View Report" --cancel-label="Cancel" --width=400; then
-   zenity --title="System Report" --text-info --width=800 --height=700 --ok-label="Save" --cancel-label="Quit" < /tmp/systeminfo-"${DATE}".txt
+if zenity --question --icon-name="info" --title="View System Report" --text="Create System Report has collected the required system data.\n\nClick <b>Cancel</b> to exit now or <b>View Report</b> to see the report." --ok-label="View Report" --cancel-label="Cancel" --width=400; then
+   zenity --title="System Report" --text-info --width=700 --height=500 --ok-label="Save" --cancel-label="Quit" < /tmp/systeminfo-"${DATE}".txt
       if [ $? -ne 0 ]; then
+         rm -f /tmp/systeminfo-"${DATE}".txt
          exit
       else
-         #get normal users
-         # User id MIN and MAX:          grep "^UID_MIN" /etc/login.defs; grep "^UID_MAX" /etc/login.defs
-         # Print users and groups:        awk -F':' '$3>=1000 && $3<=60000 {print $1" "$3}' /etc/passwd
-         #Generate the save list and on the first occurance of "FALSE" change it to "TRUE"
-         LL_LIST_D=(`awk -F':' '$3>=1000 && $3<=60000 {print "FALSE","/home/"$1}' /etc/passwd |sed '0,/FALSE/s/FALSE/TRUE/'`)
-         #Add optional save location
-         LL_LIST_H=(`awk -F':' '$3>=1000 && $3<=60000 {print "FALSE","/home/"$1"/Desktop"}' /etc/passwd`)
-
-         save_location=$(zenity --title="Create System Report: Save Location" --list --radiolist --text="Select save location then click on <b>Ok:</b>" --column="Select" --column="Save file location" --width=350 --height 200 "${LL_LIST_D[@]}" "${LL_LIST_H[@]}")
-            if [ $? -ne 0 ]; then
-               exit
-            else        
-                     #Extract username
-                  LL_USER=$(echo "$save_location" | cut -d'/' -f3)
-                  
-                  # Add filename to the save path
-                  SAVE_PATH=$(echo $save_location| sed 's,.*,&\/systeminfo-'"${DATE}"'.txt,g')
-                  
-                  # copy the file from /tmp
-                  cp /tmp/systeminfo-"${DATE}".txt $save_location
-                                                
-                                                #Change owner of the file to LL_USER
-                  sudo chown $LL_USER  $SAVE_PATH
-            fi
+         # Save report
+         szSavePath=$(zenity --file-selection --filename=systeminfo-"${DATE}".txt --file-filter='*.txt' --file-filter='All files | *' --save --confirm-overwrite)
+         sudo -u ${SUDO_USER:-$USER} cp /tmp/systeminfo-"${DATE}".txt $szSavePath 
+         rm -f /tmp/systeminfo-"${DATE}".txt
       fi
 
 else 
    exit
 fi
-
-exit
+exit 0
