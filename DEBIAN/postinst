@@ -1,0 +1,21 @@
+#! /bin/sh
+# Postinst script for bug fixes for 3.x Series
+set -e
+# Fix 'virtualbox kernel service is not running'
+# As reported here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/
+# Fix is here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/msg19295/#msg19295
+FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
+
+if [ -s "$FILE" ]; then
+	sudo sed -i "s/notify-send/echo/g" $FILE
+		else
+	echo "VirtualBox not found"
+fi
+# File ownership
+chown root:root /usr/scripts/systemreport
+chown root:root /usr/share/applications/createsysreport.desktop
+chown root:root /usr/scripts/updates-gui
+# File permissions
+chmod 755 /usr/scripts/systemreport
+chmod 644 /usr/share/applications/createsysreport.desktop
+chmod 755 /usr/scripts/updates-gui
