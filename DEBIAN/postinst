@@ -12,17 +12,20 @@ if [ -s "$FILE" ]; then
 	echo "VirtualBox not found"
 fi
 # File ownership
-chown root:root /usr/scripts/systemreport
 chown root:root /usr/share/applications/sysreport.desktop
-chown root:root /usr/scripts/updates-gui
-chown root:root /usr/bin/lite-software
 chown root:root /usr/share/applications/lite-software.desktop
+chown root:root /usr/bin/lite-software
 # File permissions
-chmod 755 /usr/scripts/systemreport
 chmod 644 /usr/share/applications/sysreport.desktop
-chmod 755 /usr/scripts/updates-gui
-chmod 755 /usr/bin/lite-software
 chmod 644 /usr/share/applications/lite-software.desktop
+
+# Folders and files permissions
+chown root:root /usr/scripts -R
+chmod 755 /usr/scripts -R
+
+chown root:root /usr/share/litesoftware -R
+find /usr/share/litesoftware -type d -exec chmod 755 {} \;
+find /usr/share/litesoftware -type f -exec chmod 644 {} \;
 
 # Remove old files if exist
 [ -e /usr/share/applications/createsysreport.desktop ] && rm -f /usr/share/applications/createsysreport.desktop
