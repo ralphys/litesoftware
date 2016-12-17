@@ -1,48 +1,39 @@
 #!/bin/bash
 #--------------------------------------------
 # Description: Linux Lite Auto Login Dialogue
-# Author: Jerry Bezencon 2014
+# Authors: Jerry Bezencon, Ralphy
 # Website: https://www.linuxliteos.com
 #--------------------------------------------
 
+# variables
+APPNAME="Enable Auto Login"
+ic="/usr/share/icons/zenity-llcc.png"
+
+while (true); do
 # Main window dialogue.
- CONFIGURE_TITLE="Enable Auto Login
------------------------------------------------------------------------------------------------------
-This will Enable Auto Login.
-Next time you restart your computer, you will be automatically logged in.
+zenity --question --icon-name="info" --window-icon="$ic" --ok-label="Enable Auto Login" --cancel-label="Cancel" --width="400" --height=60 --title="$APPNAME" \
+       --text="\n                       <b>You are about to Enable Auto Login</b>\n \
 
------------------------------------------------------------------------------------------------------
-Click on Yes to continue or No to cancel."
+Next time your computer is restarted you will be automatically signed in. \n \
 
-# Call the zenity window icon location.
- INSTALL_ICON="/usr/share/icons/zenity-llcc.png"
- CONFIGURE="Enable Auto Login"
-        
-        zenity --question --title="$CONFIGURE" --window-icon="${INSTALL_ICON}" --text="${CONFIGURE_TITLE}"
+<b>Important</b> The Auto Login feature is provided as a convenience. However, this feature may be a security risk. \
+When you Enable Auto Login, anyone who can physically obtain access to the computer can gain access to all the computer's contents, \
+including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured."
 
-                if [ "$?" -eq "0" ]; then
-                        gksudo -g --message 'To proceed with this setting your password is required. Enter your password, or press Cancel.' "sed -i "s/autologin-user=linux/autologin-user=$USER/g" /etc/lightdm/lightdm.conf" | zenity --progress --title="$CONFIGURE" --window-icon="${INSTALL_ICON}" --text="Please wait whilst we enable $CONFIGURE..." --pulsate --width=400 --auto-close --auto-kill
+if [ "$?" -eq "0" ]; then
+    gksu --message '
+      <b>Your password is required to Enable Auto Login</b> 
 
-
-                                if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-                        
-                                        zenity --error \
-                                        --title="Error" --text="$CONFIGURE has not been applied."
-                                        exit 0
-                                fi
-
-                else
-
-                                        exit 0
-                fi
-
-
-PROCEED=$(zenity --info --title="$CONFIGURE" --window-icon=/usr/share/icons/zenity-llcc.png --text="Auto Login has been Enabled."; echo $?)
-if [ ${PROCEED} -eq 1 ]; then
-	zenity --info --title="Finished" --window-icon="${INSTALL_ICON}" --text="Auto Login Enabled."
-	exit;
+Please enter your password to continue, or press Cancel to exit now.' "sed -i "s/autologin-user=linux/autologin-user=$USER/g" /etc/lightdm/lightdm.conf"
+        if [ "${PIPESTATUS[0]}" -eq "0" ]; then
+                zenity --info --title="$APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
+                exit 0
+        else
+                zenity --error --width="200" --title="$APPNAME - Error" --text="\nAuto Login could not be enabled."
+                continue
+        fi
 else
-	exit
+        exit 0
 fi
-
+done
 exit 0
