@@ -9,28 +9,34 @@
 APPNAME="Disable Auto Login"
 ic="/usr/share/icons/zenity-llcc.png"
 
+if [ $EUID -ne 0 ]; then
+    gksu -m '
+<b>Disable Auto Login requires Administrative privileges</b> 
+
+
+            Please enter your password to continue.' bash $0
+   exit
+else :
+fi
 while (true); do
 # Main window dialogue.
-zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Quit" --width="440" --height="60" --title="$APPNAME" \
+zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Cancel" --width="440" --height="60" --title="$APPNAME" \
        --text="\n                       <b>You are about to $APPNAME</b>\n \
 
 From next restart on, you will be prompted for your password to login.\n\n\
 Make sure you remember your account password before restarting the computer."
 
 if [ "$?" -eq "0" ]; then
-    gksu -m '
-      <b>Your password is required to Disable Auto Login</b> 
-
-Please enter your password to continue, or press Cancel to exit now.' "sed -i "s/autologin-user=$USER/autologin-user=linux/g" /etc/lightdm/lightdm.conf"
+    sed -i "s/autologin-user=.*/autologin-user=linux/g" /etc/lightdm/lightdm.conf
         if [ "${PIPESTATUS[0]}" -eq "0" ]; then
-                zenity --info --width="200" --height=40 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Disabled!"
+                zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Disabled!"
                 exit 0
         else
-                zenity --error --width="200" --height="40" --title="$APPNAME - Error" --text="\nAuto Login could not be disabled."
+                zenity --error --width="260" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while disabling Auto Login."                                                                                 
                 continue
         fi
 else
-        exit 0
+    exit 0
 fi
 done
 exit 0
