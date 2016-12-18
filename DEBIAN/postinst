@@ -5,19 +5,18 @@
 # As reported here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/
 # Fix is here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/msg19295/#msg19295
 FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
-
 if [ -s "$FILE" ]; then
 	sudo sed -i "s/notify-send/echo/g" $FILE
 		else
-	echo "VirtualBox not found"
+	:
 fi
 # File ownership
-chown root:root /usr/share/applications/sysreport.desktop
-chown root:root /usr/share/applications/lite-software.desktop
+chown root:root /usr/share/applications/createsysreport.desktop
+chown root:root /usr/share/applications/litesoftware.desktop
 chown root:root /usr/bin/lite-software
 # File permissions
-chmod 644 /usr/share/applications/sysreport.desktop
-chmod 644 /usr/share/applications/lite-software.desktop
+chmod 644 /usr/share/applications/createsysreport.desktop
+chmod 644 /usr/share/applications/litesoftware.desktop
 
 # Folders and files permissions
 chown root:root /usr/scripts -R
@@ -35,5 +34,3 @@ find /etc/skel -type f -exec chmod 644 {} \;
 sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
 
 # Remove old files if exist
-[ -e /usr/share/applications/createsysreport.desktop ] && rm -f /usr/share/applications/createsysreport.desktop
-[ -e /usr/share/applications/litesoftware.desktop ] && rm -f /usr/share/applications/litesoftware.desktop

@@ -8,11 +8,21 @@
 # variables
 APPNAME="Enable Auto Login"
 ic="/usr/share/icons/zenity-llcc.png"
+EALUSER=$(sudo -u ${SUDO_USER:-$USER} whoami)
 
+if [ $EUID -ne 0 ]; then
+    gksu -m '
+<b>Enable Auto Login requires Administrative privileges</b> 
+
+
+            Please enter your password to continue.' bash $0
+   exit
+else :
+fi
 while (true); do
 # Main window dialogue.
-zenity --question --icon-name="info" --window-icon="$ic" --ok-label="Enable Auto Login" --cancel-label="Quit" --width="400" --height="60" --title="$APPNAME" \
-       --text="\n                       <b>You are about to Enable Auto Login</b>\n \
+zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Cancel" --width="400" --height="60" --title="$APPNAME" \
+       --text="\n                       <b>You are about to $APPNAME</b>\n \
 
 Next time your computer is restarted you will be automatically signed in. \n \
 
@@ -21,15 +31,12 @@ When you Enable Auto Login, anyone who can physically obtain access to the compu
 including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured."
 
 if [ "$?" -eq "0" ]; then
-    gksu --message '
-      <b>Your password is required to Enable Auto Login</b> 
-
-Please enter your password to continue, or press Cancel to exit now.' "sed -i "s/autologin-user=linux/autologin-user=$USER/g" /etc/lightdm/lightdm.conf"
+    sed -i "s/autologin-user=.*/autologin-user=$EALUSER/g" /etc/lightdm/lightdm.conf
         if [ "${PIPESTATUS[0]}" -eq "0" ]; then
-                zenity --info --width="200" --height=40 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
+                zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
                 exit 0
         else
-                zenity --error --width="200" --height="40" --title="$APPNAME - Error" --text="\nAuto Login could not be enabled."
+                zenity --error --width="280" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while enabling Auto Login."
                 continue
         fi
 else
