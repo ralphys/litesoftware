@@ -11,8 +11,8 @@ ic="/usr/share/icons/zenity-llcc.png"
 
 while (true); do
 # Main window dialogue.
-zenity --question --icon-name="info" --window-icon="$ic" --ok-label="Enable Auto Login" --cancel-label="Quit" --width="400" --height="60" --title="$APPNAME" \
-       --text="\n                       <b>You are about to Enable Auto Login</b>\n \
+zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Quit" --width="400" --height="60" --title="$APPNAME" \
+       --text="\n                       <b>You are about to $APPNAME</b>\n \
 
 Next time your computer is restarted you will be automatically signed in. \n \
 
@@ -21,7 +21,7 @@ When you Enable Auto Login, anyone who can physically obtain access to the compu
 including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured."
 
 if [ "$?" -eq "0" ]; then
-    gksu --message '
+    gksu -m '
       <b>Your password is required to Enable Auto Login</b> 
 
 Please enter your password to continue, or press Cancel to exit now.' "sed -i "s/autologin-user=linux/autologin-user=$USER/g" /etc/lightdm/lightdm.conf"
