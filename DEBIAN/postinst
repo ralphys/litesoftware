@@ -1,0 +1,39 @@
+#! /bin/sh
+# Postinst script for bug fixes for 3.x Series
+
+# Fix 'virtualbox kernel service is not running'
+# As reported here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/
+# Fix is here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/msg19295/#msg19295
+FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
+
+if [ -s "$FILE" ]; then
+	sudo sed -i "s/notify-send/echo/g" $FILE
+		else
+	echo "VirtualBox not found"
+fi
+# File ownership
+chown root:root /usr/share/applications/sysreport.desktop
+chown root:root /usr/share/applications/lite-software.desktop
+chown root:root /usr/bin/lite-software
+# File permissions
+chmod 644 /usr/share/applications/sysreport.desktop
+chmod 644 /usr/share/applications/lite-software.desktop
+
+# Folders and files permissions
+chown root:root /usr/scripts -R
+chmod 755 /usr/scripts -R
+
+chown root:root /usr/share/litesoftware -R
+find /usr/share/litesoftware -type d -exec chmod 755 {} \;
+find /usr/share/litesoftware -type f -exec chmod 644 {} \;
+# This folder MUST have correct permissions for systems with multiple accounts
+chown root:root /etc/skel -R
+find /etc/skel -type d -exec chmod 755 {} \;
+find /etc/skel -type f -exec chmod 644 {} \;
+
+# UPDATE .desktop files
+sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
+
+# Remove old files if exist
+[ -e /usr/share/applications/createsysreport.desktop ] && rm -f /usr/share/applications/createsysreport.desktop
+[ -e /usr/share/applications/litesoftware.desktop ] && rm -f /usr/share/applications/litesoftware.desktop

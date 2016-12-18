@@ -18,7 +18,7 @@ then
 fi
 
 # Check Internet access
-if eval "sudo -u ${SUDO_USER:-$USER} curl -sk google.com" >> /dev/null 2>&1; then
+if eval "curl -sk google.com" >> /dev/null 2>&1; then
   :  # continue - internet connection check passed 
 else # Prompt ERROR internet connection check failed and exit
     (zenity --info --width=320 --height=120 --ok-label="Got it!" --title="  Lite Updates - No Internet connection detected..." \
@@ -29,12 +29,24 @@ fi
 APPNAME="Linux Lite Updates"                # Application name variable
 ic="/usr/share/icons/zenity-llcc.png"       # Linux Lite icon variable
 UPDATES=$(mktemp /tmp/updateslist.XXXXXX)   # Updates log variable
+DATE=$(date +"%A-%d-%B-%Y-%T")              # Date variable
 
-# Get list of available updated packages then populate them to /tmp/updateslist
-zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Quit" --title="  $APPNAME" \
+# Script start - Ask for elevation, else exit
+if [ $EUID -ne 0 ]; then
+   zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Quit" --title="  $APPNAME" \
        --text="\n$APPNAME will now fetch the Updates list\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed."
+   case $? in
+      0) gksu -m '
+  <b>Install Updates - Administrative Account Required</b>
+   
+Please enter your password to continue, or Cancel to exit.' "bash $0"
+         exit
+         ;;
+      1) exit
+   esac
+fi
   
-  if [ "$?" -eq "0" ];then
+if [ "$?" -eq "0" ];then
   APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
   apt-get update 2>&1 | awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (100*count/total);print (percentage < 90?percentage:90),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
     | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --no-cancel --pulsate --auto-close --width=600   
@@ -51,12 +63,12 @@ zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continu
 # Creates a list in /tmp/updateslist
   apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,\+]+)\s\[([\w,\-,\d,\.,~,:,\+]+)\]\s\(([\w,\-,\d,\.,~,:,\+]+)\)? /i) {print "Name: $1 INSTALLED: $2 AVAILABLE: $3\n"}' | awk '{print NR,":\t"$0}' | tee $UPDATES
 
-# Check if updates are available, if there are none, remove /tmp/updateslist.XXXXXX and pop up a 'No Updates Available' dialog
+# Check if updates are available, if there are none, remove /tmp/updateslist.XXXXXX and pop up a 'your system is up-to-date. Available' dialog
   if [  -z "$(cat $UPDATES)"  ]; then
     rm $UPDATES
     unset UPDATES
-    zenity --info --window-icon=$ic  --width=180 --height=80 --title="  $APPNAME" \
-           --text="\nNo updates available."
+    zenity --info --window-icon=$ic  --width=180 --height=60 --title="  $APPNAME" \
+           --text="\nYour system is up to date."
     exit 0
   fi
 
@@ -95,10 +107,26 @@ DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o 
          exit 0
     fi
 
-    PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon="$ic" --text="\nUpdates have finished installing.\n\nWould you like to view the $APPNAME log?"; echo $?)
-    if [ ${PROCEED} -eq 1 ]; then
-      zenity --info --width=280 --height=60 --timeout=3 --title="  $APPNAME" --window-icon="$ic" --text="\n$APPNAME successfully completed!"
+    PROCEED=$(zenity --question --width=300 --height=80 --title=" $APPNAME" --window-icon="$ic" --text="\n$APPNAME completed successfully!\n\nWould you like to view the $APPNAME log?"; echo $?)
+    if [ ${PROCEED} -eq 1 ]; then 
+        continue
     else
-      zenity --text-info --ok-label="Quit" --cancel-label="Cancel" --title=" $APPNAME - Log" --width=650 --height=340 --filename="/var/log/llupdates.log"
+      zenity --text-info --cancel-label="Save" --ok-label="Quit"  --title=" $APPNAME - Log" --width=650 --height=340 --filename="/var/log/llupdates.log"
+          if [ $? -ne 0 ]; then
+            # Save report
+            szSavePath=$(zenity --title="    Save log" --width=550 --height=380 --file-selection --filename=llupdates-"${DATE}".txt --file-filter='*.txt' --file-filter='All files | *' --save --confirm-overwrite)
+            sudo -u ${SUDO_USER:-$USER} cp /var/log/llupdates.log $szSavePath 
+          else
+          continue
+          fi
     fi
+    if [ -s /var/run/reboot-required ]; then
+        zenity --question --ok-label="Reboot now !" --cancel-label="Continue using my system" --title=" $APPNAME - Reboot required" --width=300 --height=100 \
+               --text="\nSome recent updates requires rebooting the system for changes to take effect.\n\n          Would you like to reboot now?"
+            if [ "$?" -eq "0" ]; then 
+                reboot
+            else 
+              exit
+            fi
+    fi        
 exit 0

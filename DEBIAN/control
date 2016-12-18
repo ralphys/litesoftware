@@ -1,0 +1,12 @@
+Package: lite-software
+Version: 2.0-0240-linuxlite
+Essential: yes
+Architecture: all
+Maintainer: Jerry Bezencon <valtam@linuxliteos.com>, Ralphy<postmaster@unlockforus.com>
+Installed-Size: 1100
+Depends: apt, zenity, gksu
+Section: base
+Priority: required
+Homepage: http://www.linuxliteos.com
+Description: Lite Software
+ A tool to easily install and remove popular software in Linux Lite.
