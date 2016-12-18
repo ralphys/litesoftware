@@ -18,6 +18,18 @@ if [ $EUID -ne 0 ]; then
    exit
 else :
 fi
+
+if grep -q -x "autologin-user=linux" /etc/lightdm/lightdm.conf; then
+        zenity --question --width="280" --height=40 --title="   $APPNAME" --window-icon=$ic \
+        --text="\n<b>Auto Login is currently not enabled!</b> \n\nAre you looking to Enable Auto Login instead?"
+            if [ "$?" -eq "0" ]; then
+                bash /usr/scripts/autologin-e; exit 0
+            else exit 0
+            fi
+    else 
+        continue
+    fi
+
 while (true); do
 # Main window dialogue.
 zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Cancel" --width="440" --height="60" --title="$APPNAME" \
