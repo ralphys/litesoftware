@@ -33,13 +33,13 @@ DATE=$(date +"%A-%d-%B-%Y-%T")              # Date variable
 
 # Script start - Ask for elevation, else exit
 if [ $EUID -ne 0 ]; then
-   zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Quit" --title="  $APPNAME" \
-       --text="\n$APPNAME will now fetch the Updates list\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed."
+   zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Cancel" --title="  $APPNAME" \
+       --text="\n$APPNAME will now fetch the Updates list\n\nClick <b>Cancel</b> to exit now or <b>Continue</b> to proceed."
    case $? in
       0) gksu -m '
-  <b>Install Updates - Administrative Account Required</b>
+  <b>Install Updates requires Administrative privileges</b>
    
-Please enter your password to continue, or Cancel to exit.' "bash $0"
+      Please enter your password to continue.' "bash $0"
          exit
          ;;
       1) exit
