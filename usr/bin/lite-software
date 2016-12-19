@@ -38,8 +38,9 @@ APPNAME="Lite Software"               # Application name
 if [ $EUID -ne 0 ]; then
     gksu -m '
   <b>Lite Software requires Administrative privileges</b>
+  
    
-      Please enter your password to continue.' bash $0
+            Please enter your password to continue.' bash $0
          exit
      else :
   fi
