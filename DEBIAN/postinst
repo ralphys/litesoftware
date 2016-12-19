@@ -10,10 +10,12 @@ FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
 # File ownership
 chown root:root /usr/share/applications/createsysreport.desktop
 chown root:root /usr/share/applications/litesoftware.desktop
+chown root:root /usr/share/applications/netsharesettings.desktop
 chown root:root /usr/bin/lite-software
 # File permissions
 chmod 644 /usr/share/applications/createsysreport.desktop
 chmod 644 /usr/share/applications/litesoftware.desktop
+chmod 644 /usr/share/applications/netsharesettings.desktop
 
 # Folders and files permissions
 chown root:root /usr/scripts -R
