@@ -49,7 +49,7 @@ fi
 if [ "$?" -eq "0" ];then
   APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
   apt-get update 2>&1 | awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (1000*count/total);print (percentage < 90?percentage:99),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
-    | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --no-cancel --pulsate --auto-close --width=500   
+    | zenity --progress --text="Updating package lists..." --window-icon=$ic --title="Updating Software Sources - please wait..." --percentage=0 --no-cancel --pulsate --auto-close --width=600   
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
           unset APTUPDATE
           rm $UPDATES
@@ -92,7 +92,7 @@ zenity --text-info --ok-label="Update Now" --cancel-label="Cancel" --title="  $A
 
 #Begin upgrade
 DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y  2>&1 | tee /var/log/llupdates.log | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", substr($0, 0, 128); fflush(stdout)}' \
-    | ( zenity --window-icon=$ic --progress --width=500 --text="Downloading package(s)...\nThis may take a while." --title="Downloading - please wait..." --percentage=0 --auto-close ; zenity --progress --window-icon=$ic --width=500 --text="Installing and configuring packages...\nThis may take a while." --title="Installing - please wait..."  --pulsate --auto-close )
+    | ( zenity --window-icon=$ic --progress --width=600 --text="Downloading package(s)...\nThis may take a while." --title="Downloading - please wait..." --percentage=0 --auto-close ; zenity --progress --window-icon=$ic --width=600 --text="Installing and configuring packages...\nThis may take a while." --title="Installing - please wait..."  --pulsate --auto-close )
 
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
          zenity --error --width=240 --height=60 --title="  $APPNAME - Error" \
