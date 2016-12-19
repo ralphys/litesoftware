@@ -1,14 +1,12 @@
 #! /bin/sh
+set -e
 # Postinst script for bug fixes for 3.x Series
-
 # Fix 'virtualbox kernel service is not running'
 # As reported here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/
 # Fix is here - https://www.linuxliteos.com/forums/other/vboxclient-the-virtualbox-kernel-service-is-not-running/msg19295/#msg19295
 FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
-if [ -s "$FILE" ]; then
-	sudo sed -i "s/notify-send/echo/g" $FILE
-		else :
-fi
+[ -s "$FILE" ] && sed -i "s/notify-send/echo/g" $FILE
+
 # File ownership
 chown root:root /usr/share/applications/createsysreport.desktop
 chown root:root /usr/share/applications/litesoftware.desktop
@@ -24,6 +22,7 @@ chmod 755 /usr/scripts -R
 chown root:root /usr/share/litesoftware -R
 find /usr/share/litesoftware -type d -exec chmod 755 {} \;
 find /usr/share/litesoftware -type f -exec chmod 644 {} \;
+
 # This folder MUST have correct permissions for systems with multiple accounts
 chown root:root /etc/skel -R
 find /etc/skel -type d -exec chmod 755 {} \;
