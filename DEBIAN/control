@@ -1,5 +1,5 @@
 Package: lite-software
-Version: 2.0-0240-linuxlite
+Version: 2.0-0260-linuxlite
 Essential: yes
 Architecture: all
 Maintainer: Jerry Bezencon <valtam@linuxliteos.com>, Ralphy<postmaster@unlockforus.com>
