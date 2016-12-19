@@ -226,7 +226,7 @@ install_menu(){
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info  --width=280 --title='  $APPNAME' --text='\nNo application was selected for installation.'
+    zenity --info  --width=280 --title='  Install Software' --text='\nNo application was selected for installation.'
     continue
   fi
   
@@ -283,7 +283,7 @@ remove_menu(){
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info --width=260 --title='   $APPNAME - Remove' --text='\nNo application was selected for removal.'
+    zenity --info --width=260 --title='   Remove Software' --text='\nNo application was selected for removal.'
     continue
   fi
 
