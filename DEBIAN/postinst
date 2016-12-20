@@ -21,7 +21,6 @@ chmod 644 /usr/share/applications/netsharesettings.desktop
 chown root:root /usr/scripts -R
 chmod 755 /usr/scripts -R
 chown root:root /usr/share/liteappsicons -R
-chmod 755 /usr/share/liteappsicons
 find /usr/share/liteappsicons -type d -exec chmod 755 {} \;
 find /usr/share/liteappsicons -type f -exec chmod 644 {} \;
 
