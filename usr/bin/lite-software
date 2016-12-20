@@ -323,10 +323,10 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  TASK=$(zenity --list --imagelist --width=280 --height=158 --cancel-label="Quit" --window-icon=$ic \
-  --text='        <span font="Sans Bold 10">Please select a Task below</span>:\n' \
+  TASK=$(zenity --list --imagelist --width=240 --height=158 --cancel-label="Quit" --window-icon=$ic \
+  --text='    <span font="Sans Bold 9">Please select a Task below</span>:\n' \
   --title="   $APPNAME" --hide-header --column="Icons" --column="Task" --column="Code Task" --hide-column=3 --print-column=3 \
-  "$APPINST" "  Install popular Linux Software" 1 "$APPREM" "  Remove popular Linux Software" 2)
+  "$APPINST" "  Install Software" 1 "$APPREM" "  Remove Software" 2)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
