@@ -33,4 +33,6 @@ find /etc/skel -type f -exec chmod 644 {} \;
 [ -e "/etc/skel/.local/share/applications/exo-file-manager.desktop" ] && sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
 
 # Remove old files if exist
-[ -e "/usr/share/litesoftware" ] && rm -fr /usr/share/litesoftware
+if [ -d "/usr/share/litesoftware" ]; then
+	rm -rf /usr/share/litesoftware
+fi
