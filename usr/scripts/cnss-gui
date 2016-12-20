@@ -29,7 +29,7 @@ if [ "$?" -eq "0" ]; then
 EDITSHARES=$(xdg-open /etc/samba/smb.conf )
 unset EDITSHARES
 
-zenity --question --width="300"  --icon-name="info" --ok-label="Edit again" --cancel-label="Restart Share Services" --title="$APPNAME" --window-icon="$ic" \
+zenity --question --width="300"  --icon-name="info" --default-cancel --ok-label="Edit again" --cancel-label="Restart Share Services" --title="$APPNAME" --window-icon="$ic" \
        --text="\nReady to restart the Network Share Services or would you like to review the settings one more time?"
 
     if [ "$?" -eq "0" ]; then
