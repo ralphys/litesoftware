@@ -22,6 +22,7 @@ chown root:root /usr/scripts -R
 chmod 755 /usr/scripts -R
 
 chown root:root /usr/share/litesoftware -R
+chown root:root /usr/share/liteappsicons -R
 find /usr/share/litesoftware -type d -exec chmod 755 {} \;
 find /usr/share/litesoftware -type f -exec chmod 644 {} \;
 
