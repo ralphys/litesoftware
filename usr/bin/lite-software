@@ -32,8 +32,10 @@ log(){
 TMP_LOG=/tmp/lite-software.log
 
 # variables
-ic="/usr/share/icons/zenity-llcc.png" # dialog icon 24x24 PNG
-APPNAME="Lite Software"               # Application name
+ic="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
+APPNAME="Lite Software"                                 # Application name
+APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
+APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png" 
 
 if [ $EUID -ne 0 ]; then
     gksu -m '
@@ -73,7 +75,7 @@ prepare(){
 }
 
 # Set app icon variable
-APPICON=/usr/share/litesoftware/appicons/
+APPICON=/usr/share/liteappsicons/litesoftware/appicons/
 
 #--------------------------------------------------------------------------------------------------------
 # soft_list is the list of package aliases to check/install/remove
@@ -216,7 +218,8 @@ install_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want then click the <b>Install</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
+      --column="Description" --column="Packages" --column="Optional Packages" \
+      --text='    <span font="Sans 9">Select the program or programs you want then click the <b>Install</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n </span>' \
       --title=" Install Software" --cancel-label="Back to Task Selector" --ok-label="Install" --hide-column=6,7 )
 
   # If Cancel is clicked then return to main loop
@@ -273,7 +276,8 @@ remove_menu(){
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
-      --column="Description" --column="Packages" --column="Optional Packages" --text="Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n " \
+      --column="Description" --column="Packages" --column="Optional Packages" \
+      --text='    <span font="Sans 9">Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n </span>' \
       --title="Remove Software" --cancel-label="Back to Task Selector" --ok-label="Remove" --hide-column=6,7 )
 
   # if cancel is clicked then return to main loop
@@ -319,9 +323,10 @@ prepare
 pkg_manager_check
 # The main loop
 while (true); do
-  TASK=$(zenity --width=280 --height=160 --list --radiolist --window-icon=$ic --text="  <b>Select a Task</b>:" \
-    --title="   $APPNAME" --column="Select" --column="Task" --column="Code Task" --hide-column=3 \
-    --print-column=3 --cancel-label="Quit" TRUE "Install Software" 1 FALSE "Remove Software" 2)
+  TASK=$(zenity --list --imagelist --width=280 --height=158 --cancel-label="Quit" --window-icon=$ic \
+  --text='        <span font="Sans Bold 10">Please select a Task below</span>:\n' \
+  --title="   $APPNAME" --hide-header --column="Icons" --column="Task" --column="Code Task" --hide-column=3 --print-column=3 \
+  "$APPINST" "  Install popular Linux Software" 1 "$APPREM" "  Remove popular Linux Software" 2)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
@@ -331,9 +336,6 @@ while (true); do
         ;;
       "2")
         remove_menu
-        ;;
-      "3")
-        exit 0
         ;;
     esac
   fi
