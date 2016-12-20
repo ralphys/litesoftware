@@ -20,11 +20,9 @@ chmod 644 /usr/share/applications/netsharesettings.desktop
 # Folders and files permissions
 chown root:root /usr/scripts -R
 chmod 755 /usr/scripts -R
-
-chown root:root /usr/share/litesoftware -R
 chown root:root /usr/share/liteappsicons -R
-find /usr/share/litesoftware -type d -exec chmod 755 {} \;
-find /usr/share/litesoftware -type f -exec chmod 644 {} \;
+find /usr/share/liteappsicons -type d -exec chmod 755 {} \;
+find /usr/share/liteappsicons -type f -exec chmod 644 {} \;
 
 # This folder MUST have correct permissions for systems with multiple accounts
 chown root:root /etc/skel -R
@@ -35,3 +33,4 @@ find /etc/skel -type f -exec chmod 644 {} \;
 sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
 
 # Remove old files if exist
+[ -e "/usr/share/litesoftware" ] && rm -fr /usr/share/litesoftware
