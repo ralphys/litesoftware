@@ -85,7 +85,7 @@ if [ "$?" -eq "0" ];then
   fi
 
 # Call the zenity dialog to show update list
-zenity --text-info --ok-label="Update Now" --cancel-label="Cancel" --title="  $APPNAME" --width=650 --height=340 --filename="$UPDATES"
+zenity --text-info --ok-label="Update Now" --cancel-label="Cancel" --title="  $APPNAME" --width=750 --height=340 --filename="$UPDATES"
       if [ "$?" -eq "0" ];then
         # Continue script if no halt and Remove tmp file and unset variables
         rm $UPDATES
