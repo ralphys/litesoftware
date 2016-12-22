@@ -75,7 +75,7 @@ prepare(){
 }
 
 # Set app icon variable
-APPICON=/usr/share/liteappsicons/litesoftware/appicons/
+APPICON="/usr/share/liteappsicons/litesoftware/appicons"
 
 #--------------------------------------------------------------------------------------------------------
 # soft_list is the list of package aliases to check/install/remove
@@ -94,6 +94,7 @@ soft_list=(audacity
   cherrytree
   chromiumbr
   dropbox
+  filezilla
   gamespack
   idevices
   imessenger
@@ -121,6 +122,7 @@ calibre=("$APPICON/calibre.png" "Calibre" "Office" "" "A free and open source e-
 cherrytree=("$APPICON/cherrytree.png" "Cherrytree" "Accessories" "" "A hierarchical note taking application" "cherrytree" "" )
 chromiumbr=("$APPICON/chromium.png" "Chromium Web Browser" "Internet" "" "Open-source alternative to the Google Chrome web browser" "chromium-browser" "" )
 dropbox=("$APPICON/dropbox.png" "Dropbox" "Internet" "" "A popular cloud storage application" "dropbox thunar-dropbox-plugin" "" )
+filezilla=("$APPICON/filezilla.png" "Filezilla" "Internet" "" "A robust and full-featured FTP/FTPS/SFTP client application" "filezilla" "" )
 gamespack=("$APPICON/gamespack.png" "Games Pack" "Games" "" "Provides - Solitaire, Mahjongg, Mines and Hearts games" "aisleriot gnome-mahjongg gnome-mines gnome-hearts" "" )
 idevices=("$APPICON/gtkpod.png" "iDevices Manager" "Multimedia" "" "Manage your iDevices with Gtkpod" "gtkpod" "" )
 imessenger=("$APPICON/pidgin.png" "Instant Messenger" "Internet" "" "Pidgin, a multi-protocol Instant Messenging client" "pidgin" "" )
