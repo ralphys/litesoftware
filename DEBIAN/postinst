@@ -7,6 +7,9 @@ set -e
 FILE="/etc/X11/Xsession.d/98vboxadd-xclient"
 [ -s "$FILE" ] && sed -i "s/notify-send/echo/g" $FILE
 
+# BUG - Ignoring file '20auto-upgrades.ucf-dist' in directory '/etc/apt/apt.conf.d/' as it has an invalid filename extension
+test -e ["/etc/apt/apt.conf.d/20auto-upgrades.ucf-dist"] || rm -rf /etc/apt/apt.conf.d/20auto-upgrades.ucf-dist
+
 # File ownership
 chown root:root /boot/startupsound.wav
 chown root:root /etc/apt/apt.conf.d/local
