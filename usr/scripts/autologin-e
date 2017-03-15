@@ -12,7 +12,7 @@ EALUSER=$(sudo -u ${SUDO_USER:-$USER} whoami)
 
 if [ $EUID -ne 0 ]; then
     gksu -m '
-<b>Enable Auto Login requires Administrative privileges</b> 
+<b>Enable Auto Login requires Administrative privileges</b>
 
 
             Please enter your password to continue.' bash $0
@@ -26,7 +26,7 @@ zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" -
 
 Next time your computer is restarted you will be automatically signed in. \n \
 
-<b>Important</b> The Auto Login feature is provided as a convenience. However, this feature may be a security risk. \
+<b>Important</b> : The Auto Login feature is provided for convenience. However, this feature could be considered a security risk.\n\n \
 When you Enable Auto Login, anyone who can physically obtain access to the computer can gain access to all the computer's contents, \
 including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured."
 
