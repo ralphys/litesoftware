@@ -17,9 +17,6 @@ then
    killall -9 gdebi-gtk
 fi
 
-# Upgrade will not install all packages if /var/lib/dpkg/lock file exists
-test -e ["/var/lib/dpkg/lock"] || rm -rf /var/lib/dpkg/lock
-
 # Check Internet access
 if eval "curl -sk google.com" >> /dev/null 2>&1; then
   :  # continue - internet connection check passed
