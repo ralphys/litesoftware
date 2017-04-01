@@ -31,7 +31,7 @@ fi
 # add firewall rule
 sudo ufw allow Samba > /dev/null & 2>&1
 
-zenity --question --width="480"  --icon-name="info" --ok-label="Edit Share Settings" --cancel-label="Quit" --title="$APPNAME" --window-icon="$ic" \
+zenity --question --width="480"  --icon-name="info" --ok-label="Edit share settings" --cancel-label="Quit" --title="$APPNAME" --window-icon="$ic" \
        --text="\nSamba is the software suite that provides seamless file and print services to SMB/CIFS clients. It allows for interoperability between Linux/Unix and Windows-based clients.\n\n
 <b>Reload configuration</b>: When the smb.conf file is changed, Samba automatically reloads it after a few minutes. Issuing a manual reload or restart is just as effective, causing changes to take effect immediately.
 * Network share services are not interrupted while issuing a reload.\n
