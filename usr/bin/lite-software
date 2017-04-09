@@ -10,7 +10,7 @@
 export LANG=C
 
 # Kill off any package managers that may be running
-if [ "$(pidof synaptic)" ] 
+if [ "$(pidof synaptic)" ]
 then
    killall -9 synaptic
 fi
@@ -35,17 +35,13 @@ TMP_LOG=/tmp/lite-software.log
 ic="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
 APPNAME="Lite Software"                                 # Application name
 APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
-APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png" 
+APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png"
 
 if [ $EUID -ne 0 ]; then
-    gksu -m '
-  <b>Lite Software requires Administrative privileges</b>
-  
-   
-            Please enter your password to continue.' bash $0
-         exit
-     else :
-  fi
+  pkexec $0
+  exit
+else :
+fi
 
 prepare(){
   # Check internet access
@@ -228,14 +224,14 @@ install_menu(){
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     return
   fi
-  
+
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info  --width=280 --title='  Install Software' --text='\nNo application was selected for installation.'
     continue
   fi
-  
+
   # Split selection
   OIFS=$IFS
   IFS='|'

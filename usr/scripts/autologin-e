@@ -8,39 +8,35 @@
 # variables
 APPNAME="Enable Auto Login"
 ic="/usr/share/icons/zenity-llcc.png"
-EALUSER=$(sudo -u ${SUDO_USER:-$USER} whoami)
+EALUSER=$(whoami)
+TMPF="/tmp/autologin"
+if [ ! -f "$TMPF" ]; then echo "$EALUSER" > "$TMPF"; else :; fi
+if [ $EUID -ne 0 ]; then pkexec $0; if [ "${PIPESTATUS[@]}" -eq "126" ]; then rm -f "$TMPF"; fi; exit; else :; fi
 
-if [ $EUID -ne 0 ]; then
-    gksu -m '
-<b>Enable Auto Login requires Administrative privileges</b>
-
-
-            Please enter your password to continue.' bash $0
-   exit
-else :
-fi
 while (true); do
+ALUSER=$(cat "$TMPF")
 # Main window dialogue.
 zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" --cancel-label="Cancel" --width="400" --height="60" --title="$APPNAME" \
-       --text="\n                       <b>You are about to $APPNAME</b>\n \
-
+       --text='<span font="12">            You are about to Enable Auto Login</span>\n \
 Next time your computer is restarted you will be automatically signed in. \n \
-
-<b>Important</b> : The Auto Login feature is provided for convenience. However, this feature could be considered a security risk.\n\n \
-When you Enable Auto Login, anyone who can physically obtain access to the computer can gain access to all the computer's contents, \
-including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured."
+<b>Important</b> : The Auto Login feature is provided for convenience. However, this feature could be considered a security risk.\n \
+When Auto Login is enabled, anyone who can physically obtain access to the computer can gain access to all its content, \
+including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured.'
 
 if [ "$?" -eq "0" ]; then
-    sed -i "s/autologin-user=.*/autologin-user=$EALUSER/g" /etc/lightdm/lightdm.conf
-        if [ "${PIPESTATUS[0]}" -eq "0" ]; then
-                zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been Enabled!"
-                exit 0
-        else
-                zenity --error --width="280" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while enabling Auto Login."
-                continue
-        fi
+    sed -i "s/autologin-user=.*/autologin-user=$ALUSER/g" /etc/lightdm/lightdm.conf
+    rm -f "$TMPF"
+    if [ "${PIPESTATUS[0]}" -eq "0" ]; then
+      zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been enabled."
+      exit 0
+    else
+      zenity --error --width="280" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while enabling Auto Login."
+      rm -f "$TMPF"
+      continue
+    fi
 else
-        exit 0
+    rm -f "$TMPF"
+    exit 0
 fi
 done
 exit 0
