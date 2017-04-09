@@ -1,8 +1,8 @@
 Package: lite-software
-Version: 2.0-0330-linuxlite
+Version: 2.0-0340-linuxlite
 Essential: yes
 Architecture: all
-Maintainer: Jerry Bezencon <valtam@linuxliteos.com>, Ralphy<postmaster@unlockforus.com>
+Maintainer: Jerry Bezencon <valtam@linuxliteos.com>
 Installed-Size: 1100
 Depends: apt, zenity, gksu
 Section: base

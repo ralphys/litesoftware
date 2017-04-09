@@ -1,0 +1,7 @@
+lite-software (2.0-0350-linuxlite) citrine; urgency=medium
+
+  * Added policyconfig
+  * Added Copyright file
+  * Minor wording changes
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 09 Apr 2017 21:15:56 +1200
