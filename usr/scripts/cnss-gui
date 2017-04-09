@@ -11,15 +11,7 @@ host=$(hostname)
 SMBCONF=/etc/samba/smb.conf
 TMPF=/tmp/testparm.txt
 
-if [ $EUID -ne 0 ]; then
-    gksu -m '
-<b>Editing Share Settings requires Administrative privileges   </b>
-
-
-                Please enter your password to continue.' bash $0
-   exit
-else :
-fi
+if [ $EUID -ne 0 ]; then pkexec $0; exit; else :; fi
 # backup smb.conf file
 if ! [ -f "$SMBCONF.bak" ]; then cp $SMBCONF $SMBCONF.bak; fi
 # set netbios name to hostname in smb.conf
