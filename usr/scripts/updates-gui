@@ -21,9 +21,9 @@ fi
 if eval "curl -sk google.com" >> /dev/null 2>&1; then
   :  # continue - internet connection check passed
 else # Prompt ERROR internet connection check failed and exit
-    (zenity --info --width=320 --height=120 --ok-label="Got it!" --title="  Lite Updates - No Internet connection detected..." \
-            --text="\n<b>Your computer does not seem to be connected to the internet</b> \n \nLinux Lite cannot check for updates. \nPlease check your Internet connection and try again." --no-wrap)
-        exit 0
+    zenity --info --width=400 --height=120 --ok-label="Close" --title="  Lite Updates - No Internet connection detected" \
+           --text="\n<b>Your computer does not seem to be connected to the internet</b> \n \nLinux Lite cannot check for updates. Please check your Internet connection and try again."
+    exit 0
 fi
 
 APPNAME="Linux Lite Updates"                # Application name variable
@@ -31,16 +31,12 @@ ic="/usr/share/icons/zenity-llcc.png"       # Linux Lite icon variable
 UPDATES=$(mktemp /tmp/updateslist.XXXXXX)   # Updates log variable
 DATE=$(date +"%A-%d-%B-%Y-%T")              # Date variable
 
-# Script start - Ask for elevation, else exit
+# start dialog - Ask for elevation, else exit
 if [ $EUID -ne 0 ]; then
    zenity --question --width=320 --height=100 --window-icon=$ic --ok-label="Continue" --cancel-label="Cancel" --title="  $APPNAME" \
-       --text="\n$APPNAME will now fetch the Updates list\n\nClick <b>Cancel</b> to exit now or <b>Continue</b> to proceed."
+       --text="\nLinux Lite will now fetch the Updates list\n\nClick <b>Cancel</b> to exit now or <b>Continue</b> to proceed."
    case $? in
-      0) gksu -m '
-  <b>Install Updates requires Administrative privileges</b>
-
-
-            Please enter your password to continue.' "bash $0"
+      0) pkexec $0
          exit
          ;;
       1) exit
