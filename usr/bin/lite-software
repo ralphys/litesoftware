@@ -155,7 +155,7 @@ install_pkgs(){
   declare -a pkg_arr=("${!1}")
 
   log "INFO: Installation of packages initiated: ${pkg_arr[@]}"
-  apt-get install -f --show-progress ${pkg_arr[@]} --force-yes -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", $0; fflush(stdout)}  /^Progress/ {print  match($0, /([0-9]+)/, arr); if(arr[1] != "") print arr[1] ; fflush(stdout)}' \
+  apt-get install -f --show-progress ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", $0; fflush(stdout)}  /^Progress/ {print  match($0, /([0-9]+)/, arr); if(arr[1] != "") print arr[1] ; fflush(stdout)}' \
    | ( zenity --window-icon=$ic --progress --no-cancel --width=600 --text="Downloading package(s)...\nThis may take a while." --title="$APPNAME - Downloading. Please wait..." --percentage=0 --auto-close ; zenity --progress --no-cancel --window-icon=$ic --width=600 --text="Installing and configuring packages...\nThis may take a while." --title="$APPNAME - Installing. Please wait..." --auto-close )
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
@@ -172,7 +172,7 @@ remove_pkgs(){
   declare -a pkg_arr=("${!1}")
 
   log "INFO: Removal of packages initiated: ${pkg_arr[@]}"
-  apt-get remove -f ${pkg_arr[@]} --force-yes -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=0; pkg=0}  /upgraded/ {total=$6 } /^Removing/ {print "#", $0;pkg+=1;print int((pkg - 1) * 100 / total); fflush(stdout)}' \
+  apt-get remove -f ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=0; pkg=0}  /upgraded/ {total=$6 } /^Removing/ {print "#", $0;pkg+=1;print int((pkg - 1) * 100 / total); fflush(stdout)}' \
     | zenity --progress --window-icon=$ic --no-cancel --width=600 --text="Removing package(s)...\nThis may take a while." --title="$APPNAME - Removing. Please wait..." --percentage=0 --auto-close
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
