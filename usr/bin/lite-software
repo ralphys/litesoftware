@@ -8,18 +8,17 @@
 
 # Ensure multi-language support
 export LANG=C
+# variables
+ic="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
+APPNAME="Lite Software"                                 # Application name
+APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
+APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png"
+# ask for administrative credentials
+if [ $EUID -ne 0 ]; then pkexec "$0" "$@"; exit 0 ; if [ "${PIPESTATUS[@]}" -eq "126" ]; then exit 0 ; fi; else :; fi
 
 # Kill off any package managers that may be running
-if [ "$(pidof synaptic)" ]
-then
-   killall -9 synaptic
-fi
-
-if [ ! -z "$(pgrep gdebi-gtk)" ]
-then
-   killall -9 gdebi-gtk
-fi
-
+if [ "$(pidof synaptic)" ]; then killall -9 synaptic; fi
+if [ ! -z "$(pgrep gdebi-gtk)" ]; then killall -9 gdebi-gtk; fi
 # Set up log facilities
 # Example output: [02/06/15 20:03:12] message input
 LOGFILE=/var/log/lite-software.log
@@ -27,21 +26,8 @@ log(){
     message="$@"
     echo '['$(date +%D\ %H:%M:%S)'] '$message >>$LOGFILE
 }
-
 # Log last activities to retrieve errors
 TMP_LOG=/tmp/lite-software.log
-
-# variables
-ic="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
-APPNAME="Lite Software"                                 # Application name
-APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
-APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png"
-
-if [ $EUID -ne 0 ]; then
-  pkexec $0
-  exit
-else :
-fi
 
 prepare(){
   # Check internet access
@@ -52,7 +38,6 @@ prepare(){
             --text="\n<b>Your computer does not seem to be connected to the Internet</b> \n \nYou need to be connected to the Internet to download and install applications."
     return
   fi
-
   # Check if apt-cache was built and ask to update
   if zenity --question --width=360 --height=120 --window-icon=$ic --title=" Update Software Sources" \
             --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \n\nClick <b>No</b> to continue without updating or <b>Yes</b> to update software sources next."; then
@@ -69,7 +54,6 @@ prepare(){
         log "INFO: The updating of packages was canceled by the user"
   fi
 }
-
 # Set app icon variable
 APPICON="/usr/share/liteappsicons/litesoftware/appicons"
 
@@ -315,25 +299,21 @@ remove_menu(){
   fi
   done
 }
-
 # We begin here
 prepare
-pkg_manager_check
 # The main loop
 while (true); do
   TASK=$(zenity --list --imagelist --width=240 --height=158 --cancel-label="Quit" --window-icon=$ic \
   --text='    <span font="Sans Bold 9">Please select a Task below</span>:\n' \
   --title="   $APPNAME" --hide-header --column="Icons" --column="Task" --column="Code Task" --hide-column=3 --print-column=3 \
-  "$APPINST" "  Install Software" 1 "$APPREM" "  Remove Software" 2)
+  "$APPINST" "  Install Software" "1" "$APPREM" "  Remove Software" "2")
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
     case $TASK in
-      "1")
-        install_menu
+      "1") install_menu
         ;;
-      "2")
-        remove_menu
+      "2") remove_menu
         ;;
     esac
   fi
