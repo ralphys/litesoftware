@@ -1,9 +1,9 @@
 lite-software (2.0-0350-linuxlite) citrine; urgency=medium
 
-  * Replace gksu with pkexec
+  * Replace gksu with pkexec (Install Updates, Enable/Disable Autologin, Network Share Settings, Lite Software)
   * Added policyconfig and vendor
   * Added Copyright file
-  * Remove deprecated switch (--force-yes) for packages installation and removal
+  * Remove deprecated switch (--force-yes) for packages installation and removal (Lite Software)
   * Minor wording changes
 
  -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 09 Apr 2017 21:15:56 +1200
