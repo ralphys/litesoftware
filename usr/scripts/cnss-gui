@@ -28,7 +28,7 @@ zenity --question --width="480"  --icon-name="info" --ok-label="Edit share setti
 <b>Reload configuration</b>: When the smb.conf file is changed, Samba automatically reloads it after a few minutes. Issuing a manual reload or restart is just as effective, causing changes to take effect immediately.
 * Network share services are not interrupted while issuing a reload.\n
 <b>Restart services</b>: The restart option is a quick way of stopping and then starting Samba. This is the most reliable way to make configuration changes take effect after editing the configuration file.
-* Network share services are temporarily interrupted while restarting the services.\n"
+* Network share services are temporarily interrupted while restarting the services.\n" 2>/dev/null
 
 if [ "$?" -eq "0" ]; then $EDITSHARES; else exit 0; fi
 
@@ -45,7 +45,7 @@ testparm -s /etc/samba/smb.conf 2>&1 | egrep 'Unknown|Ignoring|WARNING|NOTE:|set
 # samba testconfig function
 testconfig() {
 if [ -s $TMPF ]; then
-    review=$(zenity --text-info --window-icon="warning" --ok-label="Review configuration" --cancel-label="Continue" --width="460" --height="240" --filename="/tmp/testparm.txt" --title="Configuration errors found" ; echo $?)
+    review=$(zenity --text-info --window-icon="warning" --ok-label="Review configuration" --cancel-label="Continue" --width="460" --height="240" --filename="/tmp/testparm.txt" --title="Configuration errors found" 2>/dev/null ; echo $?)
     if [ "$review" -eq "0" ]; then
       rm -f $TMPF
       continue
@@ -53,7 +53,7 @@ if [ -s $TMPF ]; then
       egrep 'Error loading services' $TMPF
       if [ "$?" -eq "0" ]; then
         rm -f $TMPF
-        zenity --error --width="360" --height="80" --text="\nThe current errors in the configuration will not allow Samba services to run.\n\nPlease correct the configuration."
+        zenity --error --width="360" --height="80" --text="\nThe current errors in the configuration will not allow Samba services to run.\n\nPlease correct the configuration." 2>/dev/null
         continue
        fi
     fi
@@ -66,7 +66,7 @@ testconfig
 # warn user when non-critical configuration errors are found
 egrep 'Unknown|Ignoring|WARNING|NOTE:' $TMPF
 if [ "$?" -eq "0" ]; then
-  zenity --warning --width="360" --height="80" --text="\nErrors were found in the configuration.\n\nYou may not be able to access Samba shares until the configuration is corrected."
+  zenity --warning --width="360" --height="80" --text="\nErrors were found in the configuration.\n\nYou may not be able to access Samba shares until the configuration is corrected." 2>/dev/null
 fi
 # finally remove temp file
 rm -f $TMPF
@@ -76,7 +76,7 @@ if [ -f $fingerprintfile ];then
   savedmd5=`cat $fingerprintfile`
   # compare md5's
   if [[ "$savedmd5" == "$filemd5" ]]; then
-    zenity --info --timeout="3" --title="$APPNAME" --width="280" --text="\nNo changes to the configuration were made."
+    zenity --info --timeout="3" --title="$APPNAME" --width="280" --text="\nNo changes to the configuration were made." 2>/dev/null
     exit 0
   else
     :
@@ -88,23 +88,22 @@ echo $filemd5 > $fingerprintfile
 zenity --question --width="360"  --icon-name="info" --default-cancel --cancel-label="Reload configuration" --ok-label="Restart services" --title="$APPNAME" --window-icon="$ic" \
        --text="\nChanges in the configuration file have been detected.\n
 When the configuration file is modified, Samba automatically reloads it after a few minutes. You can manually reload or restart the services \
-for changes to apply immediately.\n"
+for changes to apply immediately.\n" 2>/dev/null
 
 if [ "$?" -eq "1" ]; then
   killall -HUP smbd nmbd &&
-zenity --info --timeout="3" --title="$APPNAME" --width="220" --text="\nThe configuration has been reloaded."
+zenity --info --timeout="3" --title="$APPNAME" --width="220" --text="\nThe configuration has been reloaded." 2>/dev/null
 exit
 else
   RESTARTSHARES=$( stdbuf -oL /bin/bash \-c '(systemctl restart smbd nmbd && sleep .5 )' 2>&1 |
   stdbuf -oL sed -n -e 's/^\(.\{128\}\).*/\1/' -e '/\[*$/ s/^/# /p' -e '/\*$/ s/^/# /p' |
-  zenity --progress --title="$APPNAME" --text="✔ Restarting network share services..." --pulsate --no-cancel --width=340 --auto-close )
+  zenity --progress --title="$APPNAME" --text="✔ Restarting network share services..." --pulsate --no-cancel --width=340 --auto-close 2>/dev/null )
   unset RESTARTSHARES
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-        zenity --error \
-               --title="Error" --text="$APPNAME configuration failed."
+        zenity --error --title="Error" --text="$APPNAME configuration failed." 2>/dev/null
         exit 0
       else
-          zenity --info --timeout="5" --title="$APPNAME" --window-icon="$ic" --width="230" --text="\nYour settings have been applied.\nSamba services have been restarted."
+          zenity --info --timeout="5" --title="$APPNAME" --window-icon="$ic" --width="230" --text="\nYour settings have been applied.\nSamba services have been restarted." 2>/dev/null
           exit 0
       fi
     fi
