@@ -9,44 +9,43 @@
 # Ensure multi-language support
 export LANG=C
 # variables
-ic="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
-APPNAME="Lite Software"                                 # Application name
-APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
-APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png"
+_ICON="/usr/share/icons/zenity-llcc.png"                   # dialog icon 24x24 PNG
+_APPNAME="Lite Software"                                 # Application name
+_APPINST="/usr/share/liteappsicons/litesoftware/ll-install-software_32x32.png"
+_APPREM="/usr/share/liteappsicons/litesoftware/ll-remove-software_32x32.png"
 # ask for administrative credentials
-if [ $EUID -ne 0 ]; then pkexec "$0" "$@"; exit 0 ; if [ "${PIPESTATUS[@]}" -eq "126" ]; then exit 0 ; fi; else :; fi
+if [ "$EUID" -ne "0" ]; then pkexec "$0"; exit 0 ; if [ "${PIPESTATUS[@]}" -eq "126" ]; then exit 0 ; fi; else :; fi
 
 # Kill off any package managers that may be running
 if [ "$(pidof synaptic)" ]; then killall -9 synaptic; fi
 if [ ! -z "$(pgrep gdebi-gtk)" ]; then killall -9 gdebi-gtk; fi
 # Set up log facilities
 # Example output: [02/06/15 20:03:12] message input
-LOGFILE=/var/log/lite-software.log
-log(){
+LOGFILE="/var/log/lite-software.log"
+log() {
     message="$@"
-    echo '['$(date +%D\ %H:%M:%S)'] '$message >>$LOGFILE
+    echo '['$(date +%D\ %H:%M:%S)'] '$message >> $LOGFILE
 }
 # Log last activities to retrieve errors
-TMP_LOG=/tmp/lite-software.log
+TMP_LOG="/tmp/lite-software.log"
 
-prepare(){
+prepare() {
   # Check internet access
-  if eval "curl -sk google.com" >> /dev/null 2>&1; then
-    : # pass
-  else # Prompt ERROR internet connection
-    zenity --info --width=390 --ok-label="Got it!" --title=" $APPNAME - No Internet access" \
-            --text="\n<b>Your computer does not seem to be connected to the Internet</b> \n \nYou need to be connected to the Internet to download and install applications."
+  if eval "curl -sk google.com" >> /dev/null 2>&1; then :; else # Prompt ERROR internet connection
+    zenity --info --width="390" --ok-label="Got it!" --title=" $_APPNAME - No Internet access" \
+            --text="\n<b>Your computer does not seem to be connected to the Internet</b> \n \nYou need to be connected to the Internet to download and install applications." 2>/dev/null
     return
   fi
   # Check if apt-cache was built and ask to update
-  if zenity --question --width=360 --height=120 --window-icon=$ic --title=" Update Software Sources" \
-            --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \n\nClick <b>No</b> to continue without updating or <b>Yes</b> to update software sources next."; then
+  if zenity --question --width="360" --height="120" --window-icon="$_ICON" --title=" Update Software Sources" \
+            --text="\n<b>Would you like to update software sources now?</b>\n\nIt is recommended to always update software sources before installing applications. \
+\n\nClick <b>No</b> to continue without updating or <b>Yes</b> to update software sources next." 2>/dev/null; then
       TOTALREPOS=$(cat /etc/apt/sources.list | grep '^deb' -c) # Total of repositories registered, this is approximated
       apt-get update 2>&1 | awk -v total=$TOTALREPOS '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (1000*count/total);print (percentage < 90?percentage:99),"\n#",$0 }; fflush(stdout)}' \
-      | zenity --progress --pulsate --no-cancel --text="Updating package lists..." --title="Updating Software Sources. Please wait..." --percentage=0 --auto-close --width=600
+      | zenity --progress --width="600" --pulsate --no-cancel --text="Updating package lists..." --title="Updating Software Sources. Please wait..." --percentage="0" --auto-close 2>/dev/null
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-        zenity --error --width=300 --height=90 --title="  $APPNAME - Error" \
-               --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information."
+        zenity --error --width="300" --height="90" --title="  $_APPNAME - Error" \
+               --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information." 2>/dev/null
         log "ERROR: Updating sources has failed."
       fi
         log "INFO: Software sources were updated."
@@ -125,7 +124,7 @@ weather=("$APPICON/weather.png" "Weather Monitor" "System Tray" "" "A Weather Mo
 guvcview=("$APPICON/guvcview.png" "Webcam Software" "Internet" "" "Guvcview, webcam software for your computer" "guvcview" "" )
 wine=("$APPICON/wine.png" "Wine" "Cross Platform" "" "Install and run some Windows programs and games on Linux Lite" "wine1.8" "")
 
-get_pkg_status(){
+get_pkg_status() {
   result="Installed"
   for PKG in  $@
   do
@@ -141,7 +140,7 @@ get_pkg_status(){
 }
 
 # Check for installed packages
-check_installed(){
+check_installed() {
   for element in ${soft_list[*]}
   do
     current_pkg=$element[5]
@@ -151,42 +150,42 @@ check_installed(){
   done
 }
 
-install_pkgs(){
+install_pkgs() {
   declare -a pkg_arr=("${!1}")
 
   log "INFO: Installation of packages initiated: ${pkg_arr[@]}"
   apt-get install -f --show-progress ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", $0; fflush(stdout)}  /^Progress/ {print  match($0, /([0-9]+)/, arr); if(arr[1] != "") print arr[1] ; fflush(stdout)}' \
-   | ( zenity --window-icon=$ic --progress --no-cancel --width=600 --text="Downloading package(s)...\nThis may take a while." --title="$APPNAME - Downloading. Please wait..." --percentage=0 --auto-close ; zenity --progress --no-cancel --window-icon=$ic --width=600 --text="Installing and configuring packages...\nThis may take a while." --title="$APPNAME - Installing. Please wait..." --auto-close )
+   | ( zenity --window-icon="$_ICON" --progress --no-cancel --width="600" --text="Downloading package(s)...\nThis may take a while." --title="$_APPNAME - Downloading. Please wait..." --percentage="0" --auto-close 2>/dev/null ; zenity --progress --no-cancel --window-icon="$_ICON" --width="600" --text="Installing and configuring packages...\nThis may take a while." --title="$_APPNAME - Installing. Please wait..." --auto-close 2>/dev/null)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
     log "ERROR:$err_msg"
-    zenity --error --width=340 --height=80 --title="  $APPNAME - Error" --text="\n$APPNAME Error:\n\n-$err_msg \n\n- Make sure your computer is connected to the Internet and try again."
+    zenity --error --width="340" --height="80" --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg \n\n- Make sure your computer is connected to the Internet and try again." 2>/dev/null
     return
   else
-    zenity --info --width=240 --height=80 --title="   $APPNAME - Installation" --text="\nInstallation successfully completed!"
+    zenity --info --width="240" --height="80" --title="   $_APPNAME - Installation" --text="\nInstallation successfully completed!" 2>/dev/null
     log "INFO: Installation was a success."
   fi
 }
 
-remove_pkgs(){
+remove_pkgs() {
   declare -a pkg_arr=("${!1}")
 
   log "INFO: Removal of packages initiated: ${pkg_arr[@]}"
   apt-get remove -f ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=0; pkg=0}  /upgraded/ {total=$6 } /^Removing/ {print "#", $0;pkg+=1;print int((pkg - 1) * 100 / total); fflush(stdout)}' \
-    | zenity --progress --window-icon=$ic --no-cancel --width=600 --text="Removing package(s)...\nThis may take a while." --title="$APPNAME - Removing. Please wait..." --percentage=0 --auto-close
+    | zenity --progress --window-icon="$_ICON" --no-cancel --width="600" --text="Removing package(s)...\nThis may take a while." --title="$_APPNAME - Removing. Please wait..." --percentage="0" --auto-close 2>/dev/null
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
     log "ERROR:$err_msg"
-    zenity --error --title="  $APPNAME - Error" --text="\n$APPNAME Error:\n\n-$err_msg"
+    zenity --error --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg" 2>/dev/null
     return
   else
-    zenity --info --width=240 --height=80 --title="   $APPNAME - Removal" --text="\nRemoval successfully completed!"
+    zenity --info --width="240" --height="80" --title="   $_APPNAME - Removal" --text="\nRemoval successfully completed!" 2>/dev/null
     log "INFO: Removal was a success."
   fi
 }
 
 # The installation menu
-install_menu(){
+install_menu() {
   while (true); do
   check_installed
 
@@ -199,20 +198,18 @@ install_menu(){
       fi
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
-    done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6,7 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
+    done | zenity --window-icon="$_ICON" --list --imagelist --multiple --width="920" --height="760" --print-column="2,6,7" --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" \
       --text='    <span font="Sans 9">Select the program or programs you want then click the <b>Install</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n </span>' \
-      --title=" Install Software" --cancel-label="Back to Task Selector" --ok-label="Install" --hide-column=6,7 )
+      --title=" Install Software" --cancel-label="Back to Task Selector" --ok-label="Install" --hide-column="6,7" 2>/dev/null)
 
   # If Cancel is clicked then return to main loop
-  if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-    return
-  fi
+  if [ "${PIPESTATUS[0]}" -ne "0" ]; then return; fi
 
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info  --width=280 --title='  Install Software' --text='\nNo application was selected for installation.'
+    zenity --info  --width="280" --title="  Install Software" --text="\nNo application was selected for installation." 2>/dev/null
     continue
   fi
 
@@ -232,19 +229,16 @@ install_menu(){
   done
   IFS=$OIFS
 
-  zenity --question --width=360 --window-icon="${ic}" --title="  $APPNAME - Install" \
-         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\nDo you want to proceed with the installation?"
+  zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Install" \
+         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\nDo you want to proceed with the installation?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
-    install_pkgs PKGS[@]
-    return
-  else
-    continue
+    install_pkgs PKGS[@]; return; else continue
   fi
   done
 }
 
 # The installation menu
-remove_menu(){
+remove_menu() {
   while (true); do
   check_installed
 
@@ -257,20 +251,18 @@ remove_menu(){
       fi
       row=$element[@]                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
-    done | zenity --window-icon="$ic" --list --imagelist --multiple --width=920 --height=760 --print-column=2,6 --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
+    done | zenity --window-icon="$_ICON" --list --imagelist --multiple --width="920" --height="760" --print-column="2,6" --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" \
       --text='    <span font="Sans 9">Select the program or programs you want to remove, then click the <b>Remove</b> button. \n\n<b> - Sort</b> columns by clicking on the column headers. \n<b> - Ctrl key:</b> Hold down <b>Ctrl</b> and click on applications <b>anywhere</b> on the list. \n<b> - Shift key:</b> Hold down <b>Shift</b> and click the <b>first</b> and then the <b>last</b> application you want from the list.\n </span>' \
-      --title="Remove Software" --cancel-label="Back to Task Selector" --ok-label="Remove" --hide-column=6,7 )
+      --title="Remove Software" --cancel-label="Back to Task Selector" --ok-label="Remove" --hide-column=6,7 2>/dev/null)
 
   # if cancel is clicked then return to main loop
-  if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-    return
-  fi
+  if [ "${PIPESTATUS[0]}" -ne "0" ]; then return; fi
 
   # Check if anything is selected
   echo $selection | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
-    zenity --info --width=260 --title='   Remove Software' --text='\nNo application was selected for removal.'
+    zenity --info --width="260" --title="  Remove Software" --text="\nNo application was selected for removal." 2>/dev/null
     continue
   fi
 
@@ -289,13 +281,10 @@ remove_menu(){
     PKGS=$PKGS${selection_array[$i]}" "
   done
   IFS=$OIFS
-  zenity --question --width=360 --window-icon="${ic}" --title="   $APPNAME - Remove" \
-         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\n Do you want to proceed  with the removal?"
+  zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Remove" \
+         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\n Do you want to proceed  with the removal?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
-    remove_pkgs PKGS[@]
-    return
-  else
-    continue
+    remove_pkgs PKGS[@]; return; else continue
   fi
   done
 }
@@ -303,18 +292,16 @@ remove_menu(){
 prepare
 # The main loop
 while (true); do
-  TASK=$(zenity --list --imagelist --width=240 --height=158 --cancel-label="Quit" --window-icon=$ic \
+  TASK=$(zenity --list --imagelist --width="240" --height="158" --cancel-label="Quit" --window-icon="$_ICON" \
   --text='    <span font="Sans Bold 9">Please select a Task below</span>:\n' \
-  --title="   $APPNAME" --hide-header --column="Icons" --column="Task" --column="Code Task" --hide-column=3 --print-column=3 \
-  "$APPINST" "  Install Software" "1" "$APPREM" "  Remove Software" "2")
+  --title="  $_APPNAME" --hide-header --column="Icons" --column="Task" --column="Code Task" --hide-column="3" --print-column="3" \
+  "$_APPINST" "  Install Software" "1" "$_APPREM" "  Remove Software" "2" 2>/dev/null)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
     case $TASK in
-      "1") install_menu
-        ;;
-      "2") remove_menu
-        ;;
+      "1") install_menu ;;
+      "2") remove_menu ;;
     esac
   fi
 done
