@@ -69,7 +69,7 @@ echo $box >/dev/null
 
 # initialize html report
 ( echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Final//EN">'
-echo "<html><head>"
+echo '<html style="width: 98%"><head>'
 echo "<title>$_DISTRIBUTOR System Report</title>"
 echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
 echo "<style>"
@@ -84,15 +84,15 @@ echo "    .hdd_info tr.header{border-bottom:3px double black;} "
 echo "    .hdd_info th {text-align: left;}"
 echo "    hr.x { color:#FFFFFF; background-color:#FFFFFF; border:1px dotted #888888; border-style:none none dotted; } "
 echo "</style> "
-echo "</head><body>") >> /tmp/sysreport-"${_DATE}".html
+echo '</head><body style="width: 100%">') >> /tmp/sysreport-"${_DATE}".html
 
 # Create file and insert date
-( echo "<h1 class="title">$_DISTRIBUTOR System Report</h1><table>" && echo '<tr><td><hr class="x"/></td></tr>') >> /tmp/sysreport-"${_DATE}".html
+( echo '<h1 class="title">'$_DISTRIBUTOR' System Report</h1><table style="width: 100%">' && echo '<tr><td><hr class="x"/></td></tr>') >> /tmp/sysreport-"${_DATE}".html
 now=$(date | awk '{print $1,$2,$3,$4,$6}')
 ( echo '<tr><td colspan="2" class="value">NOWDT</td></tr>' && echo '<tr><td><p></p></td></tr>') >> /tmp/sysreport-"${_DATE}".html
 sed -i 's/NOWDT/Report Date: '"$now"'/g' /tmp/sysreport-"${_DATE}".html
-echo '<tr><td class="field">⚫ Hostname: '$HOSTNAME'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
-echo '<tr><td class="field">⚫ Installed on: '$_INSTALLDT'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td class="field">• Hostname: '$HOSTNAME'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td class="field">• Installed on: '$_INSTALLDT'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
 
 # BIOS information
 bios_board_info() {
