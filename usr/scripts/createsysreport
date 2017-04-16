@@ -1,262 +1,577 @@
 #!/bin/bash
-# Linux Lite System Information Report Tool for Ubuntu based systems.
+# Linux Lite Create System Report for Ubuntu based systems.
 # Dependencies - lshw, dmidecode, hdparm
-# Developer - Misko_2083, Jerry Bezencon, Sysdrum, Ralphy
-# Creation Date - 30th November, 2013 Revision Date - 6th December 2014
-# Website - http://www.linuxliteos.com
+# Copyright 2017 © Ralphy Rhdez <rafaelrhd3z@gmail.com>
+# Website - http://unlockforus.com
+# Dated - 16th April, 2017
+# http://www.linuxliteos.com
 
-DATE=$(date +"%A-%d-%B-%Y-%T")
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2, or (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License with your
+# system, in /usr/share/common-licenses/GPL-2.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+# variables
+_DISTRIBUTOR="Linux Lite"
+_APPNAME="Create System Report"
+_ICON="/usr/share/icons/Faenza/apps/16/evolution-tasks.png"
+_RUN_ICON="/usr/share/icons/Faenza/actions/32/system-run.png"
+_DATE=$(date +"%A-%d-%B-%Y-%T")
+_CYEAR=$(date "+%Y")
+_MYUSER=$(whoami)
+_RECODE="/tmp/recode"
+_HYPERVISOR="/tmp/HYPERVISOR"
+_SDS="/tmp/sds"
+_HDDS="/tmp/hdds"
+_TMPU="/tmp/_usr"
+if [ ! -f "$_TMPU" ]; then echo "$_MYUSER" > "$_TMPU"; fi
+_SVUSER=$(cat "$_TMPU")
+
+# function remove temp files
+rm_temp_files() {
+rm -f $_HYPERVISOR
+rm -f $_HDDS
+rm -f $_RECODE
+rm -f $_SDS
+rm -f /tmp/sysreport-"${_DATE}".html
+rm -f $_TMPU
+}
 
 # Script start - Ask for elevation, else exit
 if [ $EUID -ne 0 ]; then
-   zenity --question  --width=340 --title="   Create System Report" --text="System Report will collect your system information.\n\nClick <b>Cancel</b> to exit now or <b>Create Report</b> to proceed."  --ok-label="Create Report" --cancel-label="Cancel"
+   zenity --question --ok-label="Continue" --cancel-label="Quit" --icon-name="info" --window-icon="info" --width=340 \
+          --title="   $_APPNAME" --text="\n$_APPNAME is an analysis and report generator tool for $_DISTRIBUTOR. \
+It generates HTML reports on your system's hardware and software.\n\nClick <b>Quit</b> to exit now or <b>Continue</b> to proceed." 2>/dev/null
    case $? in
-      0) gksu --message '
-   <b>System Report requires Administrative privileges</b>
-   
-
-               Please enter your password to continue.' "bash $0"
-         exit
-         ;;
-      1) exit
+      0) pkexec "$0"; if [ "${PIPESTATUS[@]}" -eq "126" ]; then rm -f "$_TMPU"; fi; exit 0 ;;
+      1) rm_temp_files; exit 0
    esac
 fi
+# set variables after auth
+_MNTON=$(mount | grep -F 'on / ' | awk '{print $1}')
+_INSTALLDT=$(tune2fs -l $_MNTON | grep "Filesystem created" | awk '{print $3,$4,$5,$6,$7}')
+
+# function check for Hypervisor
+dmidecode -t system | grep 'Manufacturer\|Product' > $_HYPERVISOR
+hypervisor_check() {
+  grep -q 'VirtualBox\|QEMU\|VMware' $_HYPERVISOR
+  if [ "$?" -eq "0" ]; then box="_virtual"; else box="_metal"; fi
+}
+hypervisor_check
+echo $box >/dev/null
+
+# initialize html report
+( echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Final//EN">'
+echo "<html><head>"
+echo "<title>$_DISTRIBUTOR System Report</title>"
+echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
+echo "<style>"
+echo "    body    { background: #fff }"
+echo "    .title  { font: bold 130% serif; color: #0066FF; padding: 20px 0 5px 0 } "
+echo "    .stitle { font: bold 100% sans-serif; color: #0044DD; padding: 10px 0 10px 0 } "
+echo "    .sstitle{ font: bold 80% serif; color: #000000; background: #efefef } "
+echo "    .field  { font: 80% sans-serif; color: #000000; padding: 2px; padding-left: 50px } "
+echo "    .value  { font: 80% sans-serif; color: #505050 } "
+echo '    .hdd_info {font-size:10pt; font-family:"Verdana","sans-serif"; border-bottom:3px double black; border-collapse: collapse; } '
+echo "    .hdd_info tr.header{border-bottom:3px double black;} "
+echo "    .hdd_info th {text-align: left;}"
+echo "    hr.x { color:#FFFFFF;	background-color:#FFFFFF; border:1px dotted #888888; border-style:none none dotted; } "
+echo "</style> "
+echo "</head><body>") >> /tmp/sysreport-"${_DATE}".html
 
 # Create file and insert date
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Report Date: "$(date +"%r, %d - %m - %Y") >> /tmp/systeminfo-"${DATE}".txt
-now=$(date +"%r, %d - %m - %Y") >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-# Begin reporting information
+( echo "<h1 class="title">$_DISTRIBUTOR System Report</h1><table>" && echo '<tr><td><hr class="x"/></td></tr>') >> /tmp/sysreport-"${_DATE}".html
+now=$(date | awk '{print $1,$2,$3,$4,$6}')
+( echo '<tr><td colspan="2" class="value">NOWDT</td></tr>' && echo '<tr><td><p></p></td></tr>') >> /tmp/sysreport-"${_DATE}".html
+sed -i 's/NOWDT/Report Date: '"$now"'/g' /tmp/sysreport-"${_DATE}".html
+echo '<tr><td class="field">⚫ Hostname: '$HOSTNAME'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td class="field">⚫ Installed on: '$_INSTALLDT'</td></tr>' >> /tmp/sysreport-"${_DATE}".html
 
-(
-echo "1"
-echo "#The Report may take a while to generate. Please wait..."
-sleep 2
+# BIOS information
+bios_board_info() {
+echo "#✔ Gathering BIOS & Motherboard Information..." && sleep .2
+echo "<tr><td class="stitle">BIOS</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">BIOS Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+dmidecode -t 0 | tail -n+7 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
 
-echo "5"
-echo "#Collecting Bios & Motherboard Information..."
-sleep .5
+# motherboard information
+echo "<tr><td class="stitle">Motherboard</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Base Board Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+dmidecode -t 2 | tail -n+7 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
 
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Bios & Motherboard Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
+# chassis info
+echo "<tr><td colspan="2" class="sstitle">Chassis Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+dmidecode -t 3 | tail -n+7 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
 
-echo " BIOS:" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo dmidecode -t 0 >> /tmp/systeminfo-"${DATE}".txt
+# cpu info
+cpu_info() {
+echo "#✔ Gathering CPU Information..." && sleep .2
+echo "<tr><td class="stitle">CPU</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">CPU Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+lscpu > $_RECODE ; ed -s $_RECODE <<< $'v/^\Model name/m$\nwq\n'
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
 
-echo " MOTHERBOARD:" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo dmidecode -t 2 >> /tmp/systeminfo-"${DATE}".txt
-sudo dmidecode -t 3 >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "10"
-echo "#Collecting CPU Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "CPU Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-grep "model name" /proc/cpuinfo >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-lscpu >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "17"
-echo "#Collecting Memory Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Memory Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo " RAM SPEED:" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo dmidecode --type 17 | grep -i speed >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo " PHYSICAL RAM DETAILS (one section per ram slot):" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo dmidecode --type 17 >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "25"
-echo "#Collecting Graphics Chip Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Graphics Chip Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo lshw -C display >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "40"
-echo "#Collecting Sound Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Sound Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-aplay --list-devices >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "45"
-echo "#Collecting Hard Drive/SSD Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Hard Drive/SSD Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-df -T >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo " MOUNT:" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-mount >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo " FDISK:" >> /tmp/systeminfo-"${DATE}".txt
-sudo fdisk -l /dev/sda >> /tmp/systeminfo-"${DATE}".txt
-sudo fdisk -l /dev/sdb >> /tmp/systeminfo-"${DATE}".txt
-sudo fdisk -l /dev/sdc >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo " HDPARM:" >> /tmp/systeminfo-"${DATE}".txt
-sudo hdparm -i /dev/sda >> /tmp/systeminfo-"${DATE}".txt
-sudo hdparm -i /dev/sdb >> /tmp/systeminfo-"${DATE}".txt
-sudo hdparm -i /dev/sdc >> /tmp/systeminfo-"${DATE}".txt
-
-echo "50"
-echo "#Collecting Groups Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Groups Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-groups $USER >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "55"
-echo "#Collecting PCI Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "PCI Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-lspci >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "60"
-echo "#Collecting USB Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "USB Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-lsusb >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "65"
-echo "#Collecting Kernel Modules Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Kernel Modules Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-lsmod >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "70"
-echo "#Collecting Kernel & OS Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Kernel & Operating System Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-uname -a >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-lsb_release -d >> /tmp/systeminfo-"${DATE}".txt
-lsb_release -i >> /tmp/systeminfo-"${DATE}".txt
-lsb_release -c >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-echo "Based on:" >> /tmp/systeminfo-"${DATE}".txt
-cat /etc/issue.net >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "75"
-echo "#Collecting Network Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Network Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-ifconfig >> /tmp/systeminfo-"${DATE}".txt
-cat /etc/network/interfaces >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-sudo lshw -C network >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "80"
-echo "#Collecting Environment Variables..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Environment Variables Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-printenv >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "85"
-echo "#Collecting Software Information..."
-sleep .5
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "Software Installed Information" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-dpkg --list >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "End of Report" >> /tmp/systeminfo-"${DATE}".txt
-echo "===========================================================" >> /tmp/systeminfo-"${DATE}".txt
-echo "" >> /tmp/systeminfo-"${DATE}".txt
-
-echo "#Done"
-echo "100"
-
-) | zenity --progress --auto-close --title="Collecting System Information" --no-cancel --width=345
-
-if zenity --question --icon-name="info" --title="View System Report" --text="Create System Report has collected the required system data.\n\nClick <b>Cancel</b> to exit now or <b>View Report</b> to see the report." --ok-label="View Report" --cancel-label="Cancel" --width=400; then
-   zenity --title="System Report" --text-info --width=700 --height=500 --ok-label="Save" --cancel-label="Quit" < /tmp/systeminfo-"${DATE}".txt
-      if [ $? -ne 0 ]; then
-         rm -f /tmp/systeminfo-"${DATE}".txt
-         exit
-      else
-         # Save report
-         szSavePath=$(zenity --title="    Save System Report" --width=550 --height=380 --file-selection --filename=systeminfo-"${DATE}".txt --file-filter='*.txt' --file-filter='All files | *' --save --confirm-overwrite)
-         sudo -u ${SUDO_USER:-$USER} cp /tmp/systeminfo-"${DATE}".txt $szSavePath 
-         rm -f /tmp/systeminfo-"${DATE}".txt
-      fi
-
-else 
-   exit
+# memory info
+ram_info() {
+echo "#✔ Gathering Memory RAM Information..." && sleep .2
+echo "<tr><td class="stitle">Memory (RAM)</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Memory (RAM) Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+if [ "$box" == "_virtual" ]; then
+  echo "<tr><td class="field">Speed: <i>Not available in Virtual Machine</i></td></tr>" >> /tmp/sysreport-"${_DATE}".html
+else
+RAMSPEED=$(dmidecode --type 17 | grep -i speed | head -n1)
+echo '<tr><td class="field">RAM RAMSPEED</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+sed -i 's/RAMSPEED/'"$RAMSPEED"'/g' /tmp/sysreport-"${_DATE}".html
 fi
+echo "<tr><td colspan="2" class="sstitle">Physical RAM Details (one section per ram slot)</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+if [ "$box" == "_virtual" ]; then
+  echo "<tr><td class="field"><i>Not available in Virtual Machine</i></td></tr>" >> /tmp/sysreport-"${_DATE}".html
+else
+dmidecode -t 17 | tail -n+6 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+sed -i '/Memory Device/ i \<tr><td><p><\/p><\/td><\/tr>' /tmp/sysreport-"${_DATE}".html
+fi
+}
+
+# graphics info
+graphics_info() {
+echo "#✔ Collecting Graphics Chip Information..."
+echo "<tr><td class="stitle">Graphics</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Graphics Chip Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+lshw -C display | tail -n+2 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# sound info
+sound_info() {
+echo "#✔ Collecting Sound Information..." && sleep .2
+echo "<tr><td class="stitle">Sound</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Sound Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+aplay --list-devices | tail -n+2 | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:<td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# hdd_info
+hdd_info() {
+echo "#✔ Collecting Hard Drive/SSD Information..." && sleep .2
+echo "<tr><td class="stitle">Hard Drive/SSD</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">File Systems</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+df -T > $_RECODE ; sed -i 's/Mounted on/Mounted-on/g' $_RECODE
+
+awk 'BEGIN {
+    split("80,80,80,80,80,60", widths, ",")
+    print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+    print "<tr class=\"header\">"
+    tag = "th"
+}
+NR != 1{
+    print "<tr>"
+    tag = "td"
+}
+{
+    for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+    print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Mount:</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+mount > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# HDD sda
+fdisk -l > $_HDDS
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Disk:</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | head -n+7 > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# Device sda
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | tail -n+8 | head -n+6 > $_RECODE
+awk 'BEGIN {
+    split("80,80,80,80,80,80,80", widths, ",")
+    print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+    print "<tr class=\"header\">"
+    tag = "th"
+}
+NR != 1{
+    print "<tr>"
+    tag = "td"
+}
+{
+    for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+    print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# HDD sdb
+if grep -q -F 'sdb' $_HDDS; then
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Disk:</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | tail -n+14 | head -n+6  > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# Device sdb
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | tail -n+21 | head -n+6 > $_RECODE
+awk 'BEGIN {
+  split("80,80,80,80,80,80,80", widths, ",")
+  print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+  print "<tr class=\"header\">"
+  tag = "th"
+}
+NR != 1{
+  print "<tr>"
+  tag = "td"
+}
+{
+  for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+  print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+else :; fi
+
+# HDD sdc
+if grep -q -F 'sdb' $_HDDS; then
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Disk:</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | tail -n+27 | head -n+6  > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# Device sdc
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat $_HDDS | tail -n+34 | head -n+6 > $_RECODE
+awk 'BEGIN {
+split("80,80,80,80,80,80,80", widths, ",")
+print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+  print "<tr class=\"header\">"
+  tag = "th"
+}
+NR != 1{
+  print "<tr>"
+  tag = "td"
+}
+{
+  for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+  print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+else :; fi
+
+# zram
+if grep -q -F 'zram' $_HDDS; then
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">zRAM Disk:</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+grep -A100 -m1 -e 'zram0' $_HDDS > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+else :; fi
+
+# hdd parameters
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Disk Info</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+
+if [ "$box" == "_virtual" ]; then echo "<tr><td class="field"><i>Not available in Virtual Machine</i></td></tr>" >> /tmp/sysreport-"${_DATE}".html
+else
+  if grep -q -F 'sda' $_HDDS; then hdparm -i /dev/sda | tail -n+2 | sed -e 's/^\s*//' -e '/^$/d' > $_SDS
+    sed '
+    s:^:<tr><td class="field">:;
+    s:$:</td></tr>:
+    ' $_SDS >> /tmp/sysreport-"${_DATE}".html
+  fi
+  if grep -q -F 'sdb' $_HDDS; then hdparm -i /dev/sdb | tail -n+2 | sed -e 's/^\s*//' -e '/^$/d' > $_SDS
+    sed '
+    s:^:<tr><td class="field">:;
+    s:$:</td></tr>:
+    ' $_SDS >> /tmp/sysreport-"${_DATE}".html
+  fi
+  if grep -q -F 'sdc' $_HDDS; then hdparm -i /dev/sdc | tail -n+2 | sed -e 's/^\s*//' -e '/^$/d' > $_SDS
+    sed '
+    s:^:<tr><td class="field">:;
+    s:$:</td></tr>:
+    ' $_SDS >> /tmp/sysreport-"${_DATE}".html
+  fi
+fi
+}
+
+# GROUPS info
+groups_info() {
+echo "#✔ Collecting Groups Information..." && sleep .2
+echo "<tr><td class="stitle">Groups</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">User '"$_SVUSER"' Groups</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+gu=$(groups $_SVUSER | sed 's/.*://'); echo $gu | sed -e 's/^\s*//' -e '/^$/d' > $_RECODE
+awk 'BEGIN {
+split("80,80,80,80,80,80,80,80,80,80", widths, ",")
+print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+  print "<tr class=\"header\">"
+  tag = "th"
+}
+NR != 1{
+  print "<tr>"
+  tag = "td"
+}
+{
+  for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+  print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# PCI info
+pci_info() {
+echo "#✔ Collecting PCI Information..." && sleep .2
+echo "<tr><td class="stitle">PCI</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">PCI Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+if [ "$box" == "_virtual" ]; then echo "<tr><td class="field"><b><i>Virtual Machine PCI Information</i></b></td></tr>" >> /tmp/sysreport-"${_DATE}".html; fi
+lspci > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# USB info
+usb_info() {
+echo "#✔ Gathering USB Information..." && sleep .2
+echo "<tr><td class="stitle">USB</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">USB Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+if [ "$box" == "_virtual" ]; then echo "<tr><td class="field"><b><i>Virtual Machine USB Information</i></b></td></tr>" >> /tmp/sysreport-"${_DATE}".html; fi
+lsusb > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Kernel Modules info
+kernel_modules_info() {
+echo "#✔ Collecting Kernel Modules Information..." && sleep .2
+echo "<tr><td class="stitle">Kernel Modules</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Kernel Modules Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+lsmod > $_RECODE
+awk 'BEGIN {
+split("220,80,40", widths, ",")
+print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+  print "<tr class=\"header\">"
+  tag = "th"
+}
+NR != 1{
+  print "<tr>"
+  tag = "td"
+}
+{
+  for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+  print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Kernel & OS info
+kernel_os_info() {
+echo "#✔ Collecting Kernel & OS Information..." && sleep .2
+echo "<tr><td class="stitle">Kernel & Operating System</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Kernel & Operating System Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+lsb_release -dica | tail -n+2 >$_RECODE; echo "Kernel $(uname -a |cut -d" " -f3-15)" >> $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Network info
+network_info() {
+echo "#✔ Collecting Network Information..."
+echo "<tr><td class="stitle">Network</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Network Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+ifconfig > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# network interfaces
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Network Interfaces</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+cat /etc/network/interfaces | tail -n+2 > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# network hardware
+echo '<tr><td><p></p></td></tr>' >> /tmp/sysreport-"${_DATE}".html
+echo '<tr><td colspan="2" class="sstitle">Network Hardware</td></tr>' >> /tmp/sysreport-"${_DATE}".html
+lshw -short -C Network > $_RECODE && sed -i 's#H/W path#H/W-path#g' $_RECODE && sed -i '2d' $_RECODE
+awk 'BEGIN {
+split("120,80,80", widths, ",")
+print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
+}
+NR == 1{
+  print "<tr class=\"header\">"
+  tag = "th"
+}
+NR != 1{
+  print "<tr>"
+  tag = "td"
+}
+{
+  for(i=1; i<=NF; ++i) print "<" tag " width=\"" widths[i] "\">" $i "</" tag ">"
+  print "</tr>"
+}
+END { print "</table><p></p></td></tr>"}' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Environment info
+environment_info() {
+echo "#✔ Gathering Environment Variables Information..."
+echo "<tr><td class="stitle">Environment Variables</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Environment Variables Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+printenv > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Software info
+software_info() {
+echo "#✔ Collecting Installed Software Information..." && sleep .2
+echo "<tr><td class="stitle">Software Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Installed Software Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+
+# software table header
+dpkg --list | head -n+4 > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+
+# software table
+dpkg --list | tail -n+6 > $_RECODE
+awk 'BEGIN { print "<tr><td class=\"field\" style=\"padding-left: 50px;\"><table>" }
+     { print "<tr><td>"$1"</td><td class=\"field\">"$2"</td><td class=\"field\">"$3"</td><td class=\"field\">"$4"</td><td class=\"field\">"$5" "$6" "$7" "$8" " $9" "$10" "$11" "$12" "$13" "$14" "$15" "$16" "$17" "$18"</td></tr>" }
+     END   { print "</table></td></tr>" }' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Sources info
+sources_info() {
+echo "#✔ Gathering Software Sources Information..." && sleep .2
+echo "<tr><td class="stitle">Sources</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+echo "<tr><td colspan="2" class="sstitle">Software Sources Information</td></tr>" >> /tmp/sysreport-"${_DATE}".html
+grep -r --include '*.list' '^deb ' /etc/apt/sources.list /etc/apt/sources.list.d/ > $_RECODE
+sed '
+s:^:<tr><td class="field">:;
+s:$:</td></tr>:
+' $_RECODE >> /tmp/sysreport-"${_DATE}".html
+}
+
+# Report selector
+optreport=$(zenity --width="360" --height=470 --cancel-label="Quit" --window-icon="$_ICON" --ok-label="Create Report" --list --checklist --title="Create System Report"  \
+	--text="\n         Untick any parameter you do not want to include:\n"  \
+	--column="       " --column="System Information"   --separator=":" \
+   TRUE "BIOS & Motherboard" TRUE CPU TRUE "Environment Variables" TRUE Graphics TRUE Groups TRUE "Hard Drive/SSD" TRUE "Kernel Modules" TRUE "Kernel & OS" \
+   TRUE "Memory RAM" TRUE Network TRUE Sound TRUE PCI TRUE Software TRUE Sources TRUE USB 2>/dev/null)
+
+# Exit on X and Quit
+if [ $? -eq "1" ]; then rm_temp_files; exit 0 ; fi
+
+# Exit when no report parameter selected
+if [ -z "$optreport" ] ; then
+   zenity --info --window-icon="$_ICON" --width="280" --ok-label="Close" --timeout="5" --title="$_APPNAME" --text="\nNo parameters were selected. $_APPNAME will exit now." 2>/dev/null
+   rm_temp_files; exit 0
+fi
+
+# Begin reporting information
+sleep 1.5 | zenity --progress --window-icon="$_RUN_ICON" --width=345 --pulsate  --no-cancel --auto-close --title="Collecting System Information" \
+                   --text="The Report may take a while to generate. Preparing..." 2>/dev/null
+( IFS=":" ; for word in $optreport ; do
+   case $word in
+      "BIOS & Motherboard") bios_board_info ;;
+      CPU) cpu_info ;;
+      "Environment Variables") environment_info ;;
+      Graphics) graphics_info ;;
+      Groups) groups_info ;;
+      "Hard Drive/SSD") hdd_info ;;
+      "Kernel Modules") kernel_modules_info ;;
+      "Kernel & OS") kernel_os_info ;;
+      "Memory RAM") ram_info ;;
+      Network) network_info ;;
+      PCI) pci_info ;;
+      Sound) sound_info ;;
+      Software) software_info ;;
+      Sources) sources_info ;;
+      USB) usb_info ;;
+   esac
+done ) | zenity --progress --window-icon="$_RUN_ICON" --width=345 --pulsate --no-cancel --auto-close --title="Collecting System Information" 2>/dev/null
+
+# report footer
+( echo "<tr><td><p></p></td></tr>" && echo "<tr><td><hr class="x"/></td></tr>"
+  echo '<tr><td style="font: 70% sans-serif;"><a>2012-'$_CYEAR'© '$_DISTRIBUTOR' Free Operating System</a></td></tr>' && echo "<tr><td><p></p></td></tr>"
+  echo "</html>" ) >> /tmp/sysreport-"${_DATE}".html
+  # show report results
+  zenity --title="System Report" --text-info --window-icon="$_ICON" --width="800" --height="500" --ok-label="Save" --cancel-label="Quit" --html --filename='/tmp/sysreport-'"${_DATE}"'.html' 2>/dev/null
+    if [ $? -ne 0 ]; then rm_temp_files; exit 0 ; else
+    # Save report
+    szSavePath=$(zenity --title="    Save System Report" --width=550 --height=380 --file-selection --filename=/home/$_SVUSER/sysreport-"${_DATE}".html \
+                        --window-icon="$_ICON" --file-filter='*.html' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
+      if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp /tmp/sysreport-"${_DATE}".html $szSavePath; rm_temp_files; else rm_temp_files; exit 0 ; fi
+    fi
 exit 0

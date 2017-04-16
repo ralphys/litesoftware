@@ -1,7 +1,10 @@
 lite-software (2.0-0350-linuxlite) citrine; urgency=medium
 
-  * Replace gksu with pkexec (Install Updates, Enable/Disable Autologin, Network Share Settings, Lite Software)
+  * Replace gksu with pkexec (Create System Report, Install Updates, Enable/Disable Autologin, Network Share Settings, Lite Software)
   * Added policyconfig and vendor
+  * Generate user-friendly HTML reports (Create System Report)
+  * Added options to create reports from selecte prameters only (Create System Report)
+  * Added Show Installation Date and Software Sources list (Create System Report)
   * Added Copyright file
   * Remove deprecated switch (--force-yes) for packages installation and removal (Lite Software)
   * Minor wording changes
