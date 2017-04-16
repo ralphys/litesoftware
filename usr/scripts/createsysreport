@@ -82,7 +82,7 @@ echo "    .value  { font: 80% sans-serif; color: #505050 } "
 echo '    .hdd_info {font-size:10pt; font-family:"Verdana","sans-serif"; border-bottom:3px double black; border-collapse: collapse; } '
 echo "    .hdd_info tr.header{border-bottom:3px double black;} "
 echo "    .hdd_info th {text-align: left;}"
-echo "    hr.x { color:#FFFFFF;	background-color:#FFFFFF; border:1px dotted #888888; border-style:none none dotted; } "
+echo "    hr.x { color:#FFFFFF; background-color:#FFFFFF; border:1px dotted #888888; border-style:none none dotted; } "
 echo "</style> "
 echo "</head><body>") >> /tmp/sysreport-"${_DATE}".html
 
@@ -525,10 +525,10 @@ s:$:</td></tr>:
 
 # Report selector
 optreport=$(zenity --width="360" --height=470 --cancel-label="Quit" --window-icon="$_ICON" --ok-label="Create Report" --list --checklist --title="Create System Report"  \
-	--text="\n         Untick any parameter you do not want to include:\n"  \
-	--column="       " --column="System Information"   --separator=":" \
+  --text="\n         Untick any parameter you do not want to include:\n"  \
+  --column="       " --column="System Information"   --separator=":" \
    TRUE "BIOS & Motherboard" TRUE CPU TRUE "Environment Variables" TRUE Graphics TRUE Groups TRUE "Hard Drive/SSD" TRUE "Kernel Modules" TRUE "Kernel & OS" \
-   TRUE "Memory RAM" TRUE Network TRUE Sound TRUE PCI TRUE Software TRUE Sources TRUE USB 2>/dev/null)
+   TRUE "Memory RAM" TRUE Network TRUE PCI TRUE Software TRUE Sources TRUE Sound TRUE USB 2>/dev/null)
 
 # Exit on X and Quit
 if [ $? -eq "1" ]; then rm_temp_files; exit 0 ; fi
