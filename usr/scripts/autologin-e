@@ -21,16 +21,16 @@ zenity --question --icon-name="info" --window-icon="$ic" --ok-label="$APPNAME" -
 Next time your computer is restarted you will be automatically signed in. \n \
 <b>Important</b> : The Auto Login feature is provided for convenience. However, this feature could be considered a security risk.\n \
 When Auto Login is enabled, anyone who can physically obtain access to the computer can gain access to all its content, \
-including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured.'
+including any networks it is connected to. This setting is recommended only for cases in which the computer is physically secured.' 2>/dev/null
 
 if [ "$?" -eq "0" ]; then
     sed -i "s/autologin-user=.*/autologin-user=$ALUSER/g" /etc/lightdm/lightdm.conf
     rm -f "$TMPF"
     if [ "${PIPESTATUS[0]}" -eq "0" ]; then
-      zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been enabled."
+      zenity --info --width="200" --height=40 --timeout=3 --title="   $APPNAME" --window-icon=$ic --text="\nAuto Login has been enabled." 2>/dev/null
       exit 0
     else
-      zenity --error --width="280" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while enabling Auto Login."
+      zenity --error --width="280" --height="40" --title="$APPNAME - Error" --text="\nAn error occurred while enabling Auto Login." 2>/dev/null
       rm -f "$TMPF"
       continue
     fi
