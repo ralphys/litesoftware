@@ -36,6 +36,8 @@ find /usr/share/icons/ -type f -exec chmod 644 {} \;
 chown root:root /etc/skel -R
 find /etc/skel -type d -exec chmod 755 {} \;
 find /etc/skel -type f -exec chmod 644 {} \;
+chmod +x /etc/skel/.conky/start
+chmod +x /etc/skel/.conky/updates
 
 # UPDATE .desktop files
 [ -e "/etc/skel/.local/share/applications/exo-file-manager.desktop" ] && sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
