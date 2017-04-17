@@ -1,3 +1,9 @@
+lite-software (2.0-0360-linuxlite) citrine; urgency=medium
+
+  * placeholder
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 17 Apr 2017 21:29:36 +1200
+
 lite-software (2.0-0350-linuxlite) citrine; urgency=medium
 
   * Replace gksu with pkexec (Create System Report, Install Updates, Enable/Disable Autologin, Network Share Settings, Lite Software)
@@ -10,4 +16,4 @@ lite-software (2.0-0350-linuxlite) citrine; urgency=medium
   * Remove deprecated switch (--force-yes) for packages installation and removal (Lite Software)
   * Minor wording changes
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 09 Apr 2017 21:15:56 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 17 Apr 2017 21:29:36 +1200
