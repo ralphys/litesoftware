@@ -76,10 +76,11 @@ echo "<style>"
 echo "    body    { background: #fff }"
 echo "    .title  { font: bold 130% droidsans; color: #0066FF; padding: 20px 0 5px 0 } "
 echo "    .stitle { font: bold 100% droidsans; color: #0044DD; padding: 10px 0 10px 0 } "
-echo "    .sstitle{ font: bold 80% droidsans; color: #000000; background: #efefef } "
-echo "    .field  { font: 80% droidsans; color: #000000; padding: 2px; padding-left: 50px } "
-echo "    .value  { font: 80% droidsans; color: #505050 } "
-echo "    .hdd_info {font: 80% droidsans; border-bottom:3px double black; border-collapse: collapse; } "
+echo "    .sstitle{ font: bold 100% droidsans; color: #000000; background: #efefef } "
+echo "    .field  { font: 100% droidsans; color: #505050; padding: 2px; padding-left: 50px } "
+echo "    .field_small  { font: 80% droidsans; color: #505050; padding: 2px; padding-left: 50px } "
+echo "    .value  { font: 100% droidsans; color: #000000; } "
+echo "    .hdd_info {font: 100% droidsans; border-bottom:3px double black; border-collapse: collapse; } "
 echo "    .hdd_info tr.header{border-bottom:3px double black;} "
 echo "    .hdd_info th {text-align: left;}"
 echo "    hr.x { color:#FFFFFF; background-color:#FFFFFF; border:1px dotted #888888; border-style:none none dotted; } "
@@ -192,7 +193,7 @@ echo "<tr><td colspan="2" class="sstitle">File Systems</td></tr>" >> /tmp/sysrep
 df -T > $_RECODE ; sed -i 's/Mounted on/Mounted-on/g' $_RECODE
 
 awk 'BEGIN {
-    split("80,80,80,80,80,60", widths, ",")
+    split("100,90,130,130,130,60", widths, ",")
     print "<tr><td style=\"padding-left: 50px;\"><table class=\"hdd_info\">"
 }
 NR == 1{
@@ -200,7 +201,7 @@ NR == 1{
     tag = "th"
 }
 NR != 1{
-    print "<tr>"
+    print "<tr class=\"field\">"
     tag = "td"
 }
 {
@@ -237,7 +238,7 @@ NR == 1{
     tag = "th"
 }
 NR != 1{
-    print "<tr>"
+    print "<tr class=\"field\">"
     tag = "td"
 }
 {
@@ -268,7 +269,7 @@ NR == 1{
   tag = "th"
 }
 NR != 1{
-  print "<tr>"
+  print "<tr class=\"field\">"
   tag = "td"
 }
 {
@@ -300,7 +301,7 @@ NR == 1{
   tag = "th"
 }
 NR != 1{
-  print "<tr>"
+  print "<tr class=\"field\">"
   tag = "td"
 }
 {
@@ -414,7 +415,7 @@ NR == 1{
   tag = "th"
 }
 NR != 1{
-  print "<tr class=\"field\">"
+  print "<tr class=\"field_small\">"
   tag = "td"
 }
 {
@@ -469,7 +470,7 @@ NR == 1{
   tag = "th"
 }
 NR != 1{
-  print "<tr>"
+  print "<tr class=\"field\">"
   tag = "td"
 }
 {
@@ -506,7 +507,7 @@ s:$:</td></tr>:
 
 # software table
 dpkg --list | tail -n+6 > $_RECODE
-awk 'BEGIN { print "<tr><td class=\"field\" style=\"padding-left: 50px;\"><table>" }
+awk 'BEGIN { print "<tr><td class=\"field_small\" style=\"padding-left: 50px;\"><table>" }
      { print "<tr><td>"$1"</td><td class=\"field\">"$2"</td><td class=\"field\">"$3"</td><td class=\"field\">"$4"</td><td class=\"field\">"$5" "$6" "$7" "$8" " $9" "$10" "$11" "$12" "$13" "$14" "$15" "$16" "$17" "$18"</td></tr>" }
      END   { print "</table></td></tr>" }' $_RECODE >> /tmp/sysreport-"${_DATE}".html
 }
@@ -567,11 +568,14 @@ done ) | zenity --progress --window-icon="$_RUN_ICON" --width=345 --pulsate --no
   echo '<tr><td style="font: 70% sans-serif;"><a>2012-'$_CYEAR'© '$_DISTRIBUTOR' Free Operating System</a></td></tr>' && echo "<tr><td><p></p></td></tr>"
   echo "</html>" ) >> /tmp/sysreport-"${_DATE}".html
   # show report results
-  zenity --title="System Report" --text-info --window-icon="$_ICON" --width="800" --height="500" --ok-label="Save" --cancel-label="Quit" --html --filename='/tmp/sysreport-'"${_DATE}"'.html' 2>/dev/null
-    if [ $? -ne 0 ]; then rm_temp_files; exit 0 ; else
-    # Save report
-    szSavePath=$(zenity --title="    Save System Report" --width=550 --height=380 --file-selection --filename=/home/$_SVUSER/sysreport-"${_DATE}".html \
-                        --window-icon="$_ICON" --file-filter='*.html' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
-      if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp /tmp/sysreport-"${_DATE}".html $szSavePath; rm_temp_files; else rm_temp_files; exit 0 ; fi
-    fi
+_ANS=$(zenity --title="System Report" --text-info --window-icon="$_ICON" --width="880" --height="540" \
+              --extra-button="Save to Desktop" --ok-label="Save..." --cancel-label="Quit" --html --filename='/tmp/sysreport-'"${_DATE}"'.html' 2>/dev/null); _OPT=$(echo $?)
+if [[ "$_ANS" =~ "Save to Desktop" ]]; then sudo -u ${SUDO_USER:-$_SVUSER} cp /tmp/sysreport-"${_DATE}".html /home/$_SVUSER/Desktop/; rm_temp_files; exit 0 ; fi
+case $_OPT in
+  0) szSavePath=$(zenity --title="    Save System Report" --width=550 --height=380 --file-selection --filename=/home/$_SVUSER/sysreport-"${_DATE}".html \
+                         --window-icon="$_ICON" --file-filter='*.html' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
+      if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp /tmp/sysreport-"${_DATE}".html $szSavePath; rm_temp_files; else rm_temp_files; exit 0 ; fi ;;
+  1) rm_temp_files; exit 0 ;;
+esac
+done
 exit 0
