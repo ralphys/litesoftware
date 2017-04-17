@@ -1,8 +1,8 @@
-lite-software (2.0-0360-linuxlite) citrine; urgency=medium
+lite-software (2.0-0360-linuxlite) citrine; urgency=high
 
-  * placeholder
+  * Set perms for /etc/skel/.conky/start and /etc/skel/.conky/updates
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 17 Apr 2017 21:29:36 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 17 Apr 2017 22:40:07 +1200
 
 lite-software (2.0-0350-linuxlite) citrine; urgency=medium
 
