@@ -1,10 +1,10 @@
 Package: lite-software
-Version: 2.0-0340-linuxlite
+Version: 2.0-0350-linuxlite
 Essential: yes
 Architecture: all
 Maintainer: Jerry Bezencon <valtam@linuxliteos.com>
-Installed-Size: 1100
-Depends: apt, zenity, gksu
+Installed-Size: 1200
+Depends: apt, zenity, policykit-1
 Section: base
 Priority: required
 Homepage: http://www.linuxliteos.com
