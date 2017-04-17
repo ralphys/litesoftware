@@ -525,7 +525,7 @@ s:$:</td></tr>:
 
 # Report selector
 optreport=$(zenity --width="360" --height=470 --cancel-label="Quit" --window-icon="$_ICON" --ok-label="Create Report" --list --checklist --title="Create System Report"  \
-  --text="\n         Untick any parameter you do not want to include:\n"  \
+  --text="\n         Untick any list option you do not want to include:\n"  \
   --column="       " --column="System Information"   --separator=":" \
    TRUE "BIOS & Motherboard" TRUE CPU TRUE "Environment Variables" TRUE Graphics TRUE Groups TRUE "Hard Drive/SSD" TRUE "Kernel Modules" TRUE "Kernel & OS" \
    TRUE "Memory RAM" TRUE Network TRUE PCI TRUE Software TRUE Sources TRUE Sound TRUE USB 2>/dev/null)
