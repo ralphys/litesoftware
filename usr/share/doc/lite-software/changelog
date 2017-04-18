@@ -3,7 +3,7 @@ lite-software (2.0-0370-linuxlite) citrine; urgency=medium
   * Adjust text, fields, fonts and dialog sizes (Create System Report)
   * Added an extra "Save to Desktop" button to report dialog (Create System Report)
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 17 Apr 2017 22:40:07 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Tue, 18 Apr 2017 16:20:25 +1200
 
 lite-software (2.0-0360-linuxlite) citrine; urgency=high
 
