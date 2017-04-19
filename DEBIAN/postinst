@@ -37,7 +37,7 @@ chown root:root /etc/skel -R
 find /etc/skel -type d -exec chmod 755 {} \;
 find /etc/skel -type f -exec chmod 644 {} \;
 
-if [ -d "/etc/skel/.conky" ];then
+if [ -d "/etc/skel/.conky" ]; then
    [ -f "/etc/skel/.conky/start" ] && chmod +x /etc/skel/.conky/start
    [ -f "/etc/skel/.conky/updates" ] && chmod +x /etc/skel/.conky/updates
 else :; fi
