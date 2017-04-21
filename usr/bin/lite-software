@@ -22,9 +22,9 @@ if [ ! -z "$(pgrep gdebi-gtk)" ]; then killall -9 gdebi-gtk; fi
 # Set up log facilities
 # Example output: [02/06/15 20:03:12] message input
 LOGFILE="/var/log/lite-software.log"
-log() {
+lslog() {
     message="$@"
-    echo '['$(date +%D\ %H:%M:%S)'] '$message >> $LOGFILE
+    echo '['$(date +%D\ %H:%M:%S)']'"$message" >> "$LOGFILE"
 }
 # Log last activities to retrieve errors
 TMP_LOG="/tmp/lite-software.log"
@@ -46,15 +46,15 @@ prepare() {
       if [ "${PIPESTATUS[0]}" -ne "0" ]; then
         zenity --error --width="300" --height="90" --title="  $_APPNAME - Error" \
                --text="\n<b>Updating sources has failed</b>\n\nRefer to /var/log/lite-software.log for more information." 2>/dev/null
-        log "ERROR: Updating sources has failed."
+        lslog "ERROR: Updating sources has failed."
       fi
-        log "INFO: Software sources were updated."
+        lslog "INFO: Software sources were updated."
       else
-        log "INFO: The updating of packages was canceled by the user"
+        lslog "INFO: The updating of packages was canceled by the user"
   fi
 }
 # Set app icon variable
-APPICON="/usr/share/liteappsicons/litesoftware/appicons"
+APPICON="/usr/share/liteappsicons/litesoftware/appicons/"
 
 #--------------------------------------------------------------------------------------------------------
 # soft_list is the list of package aliases to check/install/remove
@@ -128,13 +128,13 @@ get_pkg_status() {
   result="Installed"
   for PKG in  $@
   do
-    TEST_PKG=(`apt-cache policy $PKG | grep "Installed:"`)
+    TEST_PKG=(`apt-cache policy "$PKG" | grep "Installed:"`)
     if [ "${TEST_PKG[1]}" == "(none)" ];then
       result="Not Installed"
       break
     fi
   done
-  read ${2} <<< $result
+  read ${2} <<< ${result}
   unset result
   unset TEST_PKG
 }
@@ -143,44 +143,44 @@ get_pkg_status() {
 check_installed() {
   for element in ${soft_list[*]}
   do
-    current_pkg=$element[5]
-    status=$element[3]
+    current_pkg="$element[5]"
+    status="$element[3]"
     get_pkg_status "${!current_pkg}" status # Get the status of the main package
-    read ${element}"[3]" <<< $status        # Write the status in the package status
+    read ${element}"[3]" <<< ${status}      # Write the status in the package status
   done
 }
 
 install_pkgs() {
   declare -a pkg_arr=("${!1}")
 
-  log "INFO: Installation of packages initiated: ${pkg_arr[@]}"
-  apt-get install -f --show-progress ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", $0; fflush(stdout)}  /^Progress/ {print  match($0, /([0-9]+)/, arr); if(arr[1] != "") print arr[1] ; fflush(stdout)}' \
+  lslog "INFO: Installation of packages initiated: ${pkg_arr[@]}"
+  apt-get install -f --show-progress ${pkg_arr[@]} -y 2>&1 | tee "$TMP_LOG" | awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total); fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", $0; fflush(stdout)}  /^Progress/ {print  match($0, /([0-9]+)/, arr); if(arr[1] != "") print arr[1] ; fflush(stdout)}' \
    | ( zenity --window-icon="$_ICON" --progress --no-cancel --width="600" --text="Downloading package(s)...\nThis may take a while." --title="$_APPNAME - Downloading. Please wait..." --percentage="0" --auto-close 2>/dev/null ; zenity --progress --no-cancel --window-icon="$_ICON" --width="600" --text="Installing and configuring packages...\nThis may take a while." --title="$_APPNAME - Installing. Please wait..." --auto-close 2>/dev/null)
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-    err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
-    log "ERROR:$err_msg"
+    err_msg=$(awk '/^E:/{$1=""; print $0}' "$TMP_LOG" | tail -n 1)
+    lslog "ERROR:$err_msg"
     zenity --error --width="340" --height="80" --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg \n\n- Make sure your computer is connected to the Internet and try again." 2>/dev/null
     return
   else
     zenity --info --width="240" --height="80" --title="   $_APPNAME - Installation" --text="\nInstallation successfully completed!" 2>/dev/null
-    log "INFO: Installation was a success."
+    lslog "INFO: Installation was a success."
   fi
 }
 
 remove_pkgs() {
   declare -a pkg_arr=("${!1}")
 
-  log "INFO: Removal of packages initiated: ${pkg_arr[@]}"
-  apt-get remove -f ${pkg_arr[@]} -y 2>&1 | tee $TMP_LOG | awk ' BEGIN { FS=" "; total=0; pkg=0}  /upgraded/ {total=$6 } /^Removing/ {print "#", $0;pkg+=1;print int((pkg - 1) * 100 / total); fflush(stdout)}' \
+  lslog "INFO: Removal of packages initiated: ${pkg_arr[@]}"
+  apt-get remove -f ${pkg_arr[@]} -y 2>&1 | tee "$TMP_LOG" | awk ' BEGIN { FS=" "; total=0; pkg=0}  /upgraded/ {total=$6 } /^Removing/ {print "#", $0;pkg+=1;print int((pkg - 1) * 100 / total); fflush(stdout)}' \
     | zenity --progress --window-icon="$_ICON" --no-cancel --width="600" --text="Removing package(s)...\nThis may take a while." --title="$_APPNAME - Removing. Please wait..." --percentage="0" --auto-close 2>/dev/null
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-    err_msg=$(awk '/^E:/{$1=""; print $0}' $TMP_LOG | tail -n 1)
-    log "ERROR:$err_msg"
+    err_msg=$(awk '/^E:/{$1=""; print $0}' "$TMP_LOG" | tail -n 1)
+    lslog "ERROR:$err_msg"
     zenity --error --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg" 2>/dev/null
     return
   else
     zenity --info --width="240" --height="80" --title="   $_APPNAME - Removal" --text="\nRemoval successfully completed!" 2>/dev/null
-    log "INFO: Removal was a success."
+    lslog "INFO: Removal was a success."
   fi
 }
 
@@ -191,12 +191,12 @@ install_menu() {
 
   selection=$(for element in ${soft_list[*]}
     do
-      pkg_status=$element[3]
+      pkg_status="$element[3]"
       #Only list Not Installed applications
       if [ "${!pkg_status}" == "Installed" ]; then
         continue;
       fi
-      row=$element[@]                          #grab the whole row
+      row="$element[@]"                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$_ICON" --list --imagelist --multiple --width="920" --height="760" --print-column="2,6,7" --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" \
@@ -207,7 +207,7 @@ install_menu() {
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then return; fi
 
   # Check if anything is selected
-  echo $selection | grep '[a-zA-Z0-9]'
+  echo "$selection" | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info  --width="280" --title="  Install Software" --text="\nNo application was selected for installation." 2>/dev/null
     continue
@@ -230,7 +230,7 @@ install_menu() {
   IFS=$OIFS
 
   zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Install" \
-         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\nDo you want to proceed with the installation?" 2>/dev/null
+         --text="\nThe following software has been selected:<b>\n\n "$PKGS_NAMES" </b>\nDo you want to proceed with the installation?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
     install_pkgs PKGS[@]; return; else continue
   fi
@@ -244,12 +244,12 @@ remove_menu() {
 
   selection=$(for element in ${soft_list[*]}
     do
-      pkg_status=$element[3]
+      pkg_status="$element[3]"
       #Only list Installed applications
       if [ "${!pkg_status}" == "Not Installed" ]; then
         continue;
       fi
-      row=$element[@]                          #grab the whole row
+      row="$element[@]"                          #grab the whole row
       printf  '%s\n' "${!row}"                 #print every element in the row separated with a newline
     done | zenity --window-icon="$_ICON" --list --imagelist --multiple --width="920" --height="760" --print-column="2,6" --separator="| " --column="Select" --column="Name" --column="Category" --column="Status" \
       --column="Description" --column="Packages" --column="Optional Packages" \
@@ -260,7 +260,7 @@ remove_menu() {
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then return; fi
 
   # Check if anything is selected
-  echo $selection | grep '[a-zA-Z0-9]'
+  echo "$selection" | grep '[a-zA-Z0-9]'
   if [ "${PIPESTATUS[1]}" -ne "0" ]; then
     zenity --info --width="260" --title="  Remove Software" --text="\nNo application was selected for removal." 2>/dev/null
     continue
@@ -282,7 +282,7 @@ remove_menu() {
   done
   IFS=$OIFS
   zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Remove" \
-         --text="\nThe following software has been selected:<b>\n\n $PKGS_NAMES </b>\n Do you want to proceed  with the removal?" 2>/dev/null
+         --text="\nThe following software has been selected:<b>\n\n "$PKGS_NAMES" </b>\n Do you want to proceed  with the removal?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
     remove_pkgs PKGS[@]; return; else continue
   fi
@@ -299,7 +299,7 @@ while (true); do
   if [ "${PIPESTATUS[0]}" -ne "0" ]; then
     exit 0
   elif [ -n "${TASK}" ];then
-    case $TASK in
+    case "$TASK" in
       "1") install_menu ;;
       "2") remove_menu ;;
     esac
