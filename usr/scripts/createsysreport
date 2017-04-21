@@ -73,10 +73,10 @@ echo '<html style="width: 98%"><head>'
 echo "<title>$_DISTRIBUTOR System Report</title>"
 echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
 echo "<style>"
-echo "    body    { background: #fff }"
-echo "    .title  { font: bold 130% droidsans; color: #0066FF; padding: 20px 0 5px 0 } "
-echo "    .stitle { font: bold 100% droidsans; color: #0044DD; padding: 10px 0 10px 0 } "
-echo "    .sstitle{ font: bold 100% droidsans; color: #000000; background: #efefef } "
+echo "    body    { background: #e5e5e5 }"
+echo "    .title  { font: bold 130% droidsans; color: #3ca2c0; padding: 20px 0 5px 0 } "
+echo "    .stitle { font: bold 100% droidsans; color: #3ca2c0; padding: 10px 0 10px 0 } "
+echo "    .sstitle{ font: bold 100% droidsans; color: #ffffff; background: #3ca2c0; } "
 echo "    .field  { font: 100% droidsans; color: #505050; padding: 2px; padding-left: 50px } "
 echo "    .field_small  { font: 80% droidsans; color: #505050; padding: 2px; padding-left: 50px } "
 echo "    .value  { font: 100% droidsans; color: #000000; } "
@@ -564,7 +564,7 @@ sleep 1.5 | zenity --progress --window-icon="$_RUN_ICON" --width=345 --pulsate  
 done ) | zenity --progress --window-icon="$_RUN_ICON" --width=345 --pulsate --no-cancel --auto-close --title="Collecting System Information" 2>/dev/null
 
 # report footer
-( echo "<tr><td><p></p></td></tr>" && echo "<tr><td><hr class="x"/></td></tr>"
+( echo "<tr><td><p></p></td></tr>" && echo '<tr><td><hr class="x"/></td></tr>'
   echo '<tr><td style="font: 70% sans-serif;"><a>2012-'$_CYEAR'© '$_DISTRIBUTOR' Free Operating System</a></td></tr>' && echo "<tr><td><p></p></td></tr>"
   echo "</html>" ) >> /tmp/sysreport-"${_DATE}".html
   # show report results
