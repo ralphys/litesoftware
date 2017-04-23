@@ -3,7 +3,7 @@ lite-software (2.0-0380-linuxlite) citrine; urgency=medium
   * Update HTML page colors (Install Updates)
   * Update HTML page colors (Create System Report)
   * Fix page footer dotted line (Create System Report)
-  * Copy Updates error to clipboard feature added
+  * Copy Updates error to clipboard feature added (Install Updates)
 
  -- Jerry Bezencon <valtam@linuxliteos.com>  Thu, 20 Apr 2017 16:20:25 +1200
 

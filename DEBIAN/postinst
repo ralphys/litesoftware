@@ -46,6 +46,4 @@ else :; fi
 [ -e "/etc/skel/.local/share/applications/exo-file-manager.desktop" ] && sed -i 's#Exec=.*#Exec=/usr/scripts/updates-gui#' /etc/skel/.local/share/applications/exo-file-manager.desktop # Install Updates
 
 # Remove old files if exist
-if [ -d "/usr/share/litesoftware" ]; then
-	rm -rf /usr/share/litesoftware
-fi
+if [ -d "/usr/share/litesoftware" ]; then rm -rf /usr/share/litesoftware; fi
