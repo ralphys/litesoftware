@@ -78,6 +78,7 @@ if [ "$?" -eq "0" ];then
   echo "<tr><td class="value"><i>Click <b>Update Now</b> to install the updates listed below or <b>Cancel</b> to exit.</i></td></tr>" >> $_UPDATES
   echo '<tr><td><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtgAAAALCAYAAABF5vqtAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QMIDAINpf0QNQAABGpJREFUeNrtnNuSpCAMhhP3/R95/fdid6pcC3Ii2GCHm+lWyQnQL5FpJqKDiH4REdPfdvz7y5djP5+Py+freWocu15/lUs3OUdDz/WcJJs6xw7Bn5ZP1LGNlJhIsbrH5rgdo4atrf7H7Rw1fCfBDmrYQY3YUcOOyDnq2NDynQ0yyGEHKTKs9msyJFu0JvnJgf5eHZ6+nn4jfSg4jjRBV7W8hgfk4YM2YkAOnHZg0B4EbMOArxBkaXLOgE1WnT/H0fjc81XSA4ONEHw7hXPo2Hs/dnb0tnShY5+k61SuQUfuKejG7Trc+rS+9/Sdgv57v9+N8dB8QMOnnj3/+cMCiEkAdBghTIM8NoCfBI0taD2U63rAr+mW4FdKOnpA3LKjB+MsjAUL37XxYAPkWmC6NQYSDGvQqkGeNm+twGiRYQF9C8R74ZUdNkUg1aP/CdhmR59PwfG3QzkW1JcBkjMB39MHAR8RjI9VhgaQmp8Y8AOCThiuIQVQNf+gQLfXJggxkcBbk3F24ByGhMID7z1g1/xHB1J7INuSL8lsJQOk6DwD8wDGRIaugG0BkyhwaNVGrdpqqX56KqzevxYbDwc4a0BPSkJhqVBr/hwKnHv8sMA5B+cDGWMUmW+WcbGsAW812mKzFzA9Ff3R9RyFzlG4nwW3s4B5JxDHRrIjMJ0Fxdq1O1SMtXhEANhjAxwAbYFSb+wkkLTCVQ/QyAibVlmWxMACzVqcJd0WgCbSK/6n4JuWpHgSLxiSFM+cjiSh/x0bqRZFHyKjr/g1CPFUJT36NVj0QJcXjC1JDBuvOwJwpVWVvdtJIls3vNVnC6RxYA5Y9ESuj1Sso1tcrKA+sqZHADsLujNBt7aU5IJzZuV3VA6SdGRUq0fAdhY4eJMIC4hZYxcFYAnI4LBZA1+PrXfo89pogUuvbR7/I0kcjPMRzrVluX9g0v3DLOsTDyCerG/0VbP3NT4P2vYpsGNH7DxvOiwgbYVxS8yjb1846F80WbSMA1POtops4M6E3gwwfqrCnXU/Ww3OkXTNE7bhAT9GYR7GPhGoRtCG0T3eFujx+oDgmHsBDA5bvfvWETge9c0D95k6tGQgmqhF1g4m3Vceue+tcuPnBW33PDh5gtxIwpL5RmJ0qwAn2hj9Z8ZIchEFVE4Ym8j4jK6FaLKSnWTzA+t0lXvXDg0flItEmU/uyUZSDEcr1LNs9oJ1BMZGoXg0gcmWF01yRu3Imtv40H0iew1tA7a7NN48Phlg+4Te7F+NyAamyJaMrJhl7D2eAZi8yFp68g0aL7yG3wTQo3pnV6zwgdhFgRgPxHdWnJCsAxPimwGYM+I1OzFc6R6yBAgXYH9fHPkL/N7hZ9lW2I4wO04rVHj55Wul2vyH7gpQssNPE84C5lXi80Si9vZk+dXgW4BdbZcx5Yrt9oBdc2WOP7tXsN/2kMVLbEbF73X+FtAWMFSr9vXzstZMtTfPiXrQV9tpbtR8rVYPhmrVqtWarXEpgKpWY1Ot2je0P0+oRCvglsYEAAAAAElFTkSuQmCC" alt="" width="700" height="11" style="float:center; margin:0 1px 1px 0;" /></td></tr>' >> $_UPDATES
   ( echo "<tr><td colspan="2" class="sstitle">&nbsp;&nbsp;&nbsp;&nbsp;List of available Updates</td></tr>" && echo "<tr><td><p></p></td></tr>") >> $_UPDATES
+
   apt-get --just-print dist-upgrade 2>&1 | perl -ne 'if (/Inst\s([\w,\-,\d,\.,~,:,\+]+)\s\[([\w,\-,\d,\.,~,:,\+]+)\]\s\(([\w,\-,\d,\.,~,:,\+]+)\)? /i) {print "Name: $1 INSTALLED: $2 AVAILABLE: $3\n"}' | awk '{print NR,":\t"$0}' > $_PLAIN
   sed '
   s:^:<tr><td class="field">:;
@@ -93,6 +94,7 @@ if [ "$?" -eq "0" ];then
                --text="\nYour system is up to date." 2>/dev/null
         exit 0
       fi
+
 # Erase existing available info
 dpkg --clear-avail
 else
@@ -110,10 +112,18 @@ DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o 
     | ( zenity --progress --width="600" --window-icon="$_ICON" --text="Downloading package(s)...\nThis may take a while." --title="Downloading - please wait..." --percentage="0" --no-cancel --auto-close 2>/dev/null ; zenity --progress --window-icon="$_ICON" --width="600" --text="Installing and configuring packages...\nThis may take a while." --title="Installing - please wait..." --no-cancel --pulsate --auto-close )
 
     if [ "${PIPESTATUS[0]}" -ne "0" ]; then
-       zenity --error --width="240" --height="60" --title="  $_APPNAME - Error" \
-              --text="$_APPNAME have failed. For more information refer to: \n \n/var/log/llupdates.log" 2>/dev/null
-       rm_temp_files; exit 1
-    fi
+	_ANS=$(zenity --text-info --width="780" --height="400" --title="  $_APPNAME" \
+              --extra-button="Copy to clipboard" --ok-label="Save..." --cancel-label="Quit" --html --filename='/var/log/llupdates.log' 2>/dev/null); _OPT=$(echo $?)
+if [[ "$_ANS" =~ "Copy to clipboard" ]]; then sudo -u ${SUDO_USER:-$_SVUSER} wget https://www.linuxliteos.com/files/xclip.zip -O /tmp/xclip.zip; cd /tmp; unzip -o xclip.zip; /tmp/xclip -selection c /var/log/llupdates.log; notify-send -i /usr/share/icons/Faenza/places/48/distributor-logo-ubuntu.png 'Updates Log copied to clipboard' "Go to www.linuxliteos.com/forums and paste the log into a new or existing thread." -t 10000; exit 0 ; fi
+case $_OPT in
+  0) szSavePath=$(zenity --title="    Save Updates Log" --width=550 --height=380 --file-selection --filename=/home/$_SVUSER/llupdates.log \
+                         --window-icon="$_ICON" --file-filter='*.log' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
+      if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp /var/log/llupdates.log $szSavePath; rm_temp_files; else rm_temp_files; exit 0 ; fi ;;
+  1) rm_temp_files; exit 0 ;;
+esac
+       exit 0
+fi
+
     # Halt updates script if user selects Cancel
     else
        rm_temp_files; unset _UPDATES
@@ -121,7 +131,7 @@ DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o 
        exit 0
     fi
 
-    PROCEED=$(zenity --question --width="320" --height="80" --title="  $_APPNAME" --window-icon="$_ICON" --text="\n$_APPNAME completed successfully.\n\nWould you like to view the Updates log?" 2>/dev/null ; echo $?)
+    PROCEED=$(zenity --question --width="300" --height="80" --title="  $_APPNAME" --window-icon="$_ICON" --text="\n$_APPNAME completed successfully!\n\nWould you like to view the $_APPNAME log?" 2>/dev/null ; echo $?)
     if [ ${PROCEED} -eq 1 ]; then rm_temp_files; :; else
       zenity --text-info --cancel-label="Quit" --ok-label="Save"  --title="  $_APPNAME - Log" --width="650" --height="340" --filename="/var/log/llupdates.log" 2>/dev/null
         if [ $? -eq 0 ]; then
