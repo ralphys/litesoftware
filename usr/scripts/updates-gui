@@ -65,10 +65,10 @@ if [ "$?" -eq "0" ];then
   echo "<title>List of available Updates</title>"
   echo '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
   echo "<style>"
-  echo "    body    { background: #fff }"
-  echo "    .title  { font: bold 90% droidsans; color: #0066FF; padding: 10px 0 1px 0 } "
+  echo "    body    { background: #dcdcdc }"
+  echo "    .title  { font: bold 90% droidsans; color: #3ca2c0; padding: 10px 0 1px 0 } "
   echo "    .stitle { font: bold 90% droidsans; color: #0044DD; padding: 10px 0 10px 0 } "
-  echo "    .sstitle{ font: bold 80% droidsans; color: #000000; background: #efefef; } "
+  echo "    .sstitle{ font: bold 80% droidsans; color: #ffffff; background: #3ca2c0; } "
   echo "    .field  { font: 70% droidsans; color: #000000; padding: 2px; padding-left: 5px } "
   echo "    .value  { font: 60% droidsans; color: #505050 } "
   echo "    hr.x { color:#FFFFFF; background-color:#FFFFFF; border:1px double black; dotted #888888; border-style:none none dotted; } "
