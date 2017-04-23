@@ -10,7 +10,7 @@ APPNAME="Enable Auto Login"
 ic="/usr/share/icons/zenity-llcc.png"
 EALUSER=$(whoami)
 TMPF="/tmp/autologin"
-if [ ! -f "$TMPF" ]; then echo "$EALUSER" > "$TMPF"; else :; fi
+if [ ! -f "$TMPF" ]; then echo "$EALUSER" > "$TMPF"; chmod 600 "$TMPF"; else :; fi
 if [ $EUID -ne 0 ]; then pkexec $0; if [ "${PIPESTATUS[@]}" -eq "126" ]; then rm -f "$TMPF"; fi; exit; else :; fi
 
 while (true); do

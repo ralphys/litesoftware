@@ -14,7 +14,7 @@ _DATE=$(date +"%A-%d-%B-%Y-%T")              # Date variable
 _TMPU="/tmp/_updusr"
 _PLAIN="/tmp/updateslist.txt"
 _LLUPDATES="/var/log/llupdates.log"
-if [ ! -f "$_TMPU" ]; then echo "$_MYUPDUSER" > "$_TMPU"; fi
+if [ ! -f "$_TMPU" ]; then echo "$_MYUPDUSER" > "$_TMPU"; chmod 600 "$_TMPU"; fi
 _SVUSER=$(cat "$_TMPU")
 
 # function remove temp files

@@ -31,7 +31,7 @@ _HYPERVISOR="/tmp/HYPERVISOR"
 _SDS="/tmp/sds"
 _HDDS="/tmp/hdds"
 _TMPU="/tmp/_usr"
-if [ ! -f "$_TMPU" ]; then echo "$_MYUSER" > "$_TMPU"; fi
+if [ ! -f "$_TMPU" ]; then echo "$_MYUSER" > "$_TMPU"; chmod 600 "$_TMPU"; fi
 _SVUSER=$(cat "$_TMPU")
 
 # function remove temp files
