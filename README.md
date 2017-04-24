@@ -20,15 +20,21 @@ This project is under the GPLv2 license. Unless otherwise stated in individual f
 - Linux Lite Desktop start up sound
 - Menu, Internet, Support link
 
+## Auto Login:
+
 ![](http://imgur.com/l4pp0uc.png)
 
 ![](http://imgur.com/ikWotKx.png)
+
+## Network Share Settings:
 
 ![](http://imgur.com/mzCd1gU.png)
 
 ![](http://imgur.com/b3asIo8.png)
 
 ![](http://imgur.com/7j6m908.png)
+
+## Create System Report:
 
 ![](http://imgur.com/g2HfAFx.png)
 
@@ -37,6 +43,8 @@ This project is under the GPLv2 license. Unless otherwise stated in individual f
 ![](http://imgur.com/Jq2wtNn.png)
 
 ![](http://imgur.com/nLGd0bE.png)
+
+## Install Updates:
 
 ![](http://imgur.com/qCdQ1kG.png)
 
