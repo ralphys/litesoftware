@@ -162,7 +162,7 @@ install_pkgs() {
     zenity --error --width="340" --height="80" --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg \n\n- Make sure your computer is connected to the Internet and try again." 2>/dev/null
     return
   else
-    zenity --info --width="240" --height="80" --title="   $_APPNAME - Installation" --text="\nInstallation successfully completed!" 2>/dev/null
+    zenity --info --width="240" --height="80" --title="   $_APPNAME - Installation" --text="\nInstallation successfully completed." 2>/dev/null
     lslog "INFO: Installation was a success."
   fi
 }
@@ -179,7 +179,7 @@ remove_pkgs() {
     zenity --error --title="  $_APPNAME - Error" --text="\n$_APPNAME Error:\n\n-$err_msg" 2>/dev/null
     return
   else
-    zenity --info --width="240" --height="80" --title="   $_APPNAME - Removal" --text="\nRemoval successfully completed!" 2>/dev/null
+    zenity --info --width="240" --height="80" --title="   $_APPNAME - Removal" --text="\nRemoval successfully completed." 2>/dev/null
     lslog "INFO: Removal was a success."
   fi
 }
