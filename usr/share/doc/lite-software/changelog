@@ -1,3 +1,9 @@
+lite-software (2.0-0370-linuxlite) citrine; urgency=high
+
+  * placeholder
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 24 Apr 2017 18:35:06 +1200
+
 lite-software (2.0-0380-linuxlite) citrine; urgency=medium
 
   * Update HTML page colors (Install Updates)
@@ -5,7 +11,7 @@ lite-software (2.0-0380-linuxlite) citrine; urgency=medium
   * Fix page footer dotted line (Create System Report)
   * Copy Updates error to clipboard feature added (Install Updates)
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Thu, 20 Apr 2017 16:20:25 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 24 Apr 2017 18:35:06 +1200
 
 lite-software (2.0-0370-linuxlite) citrine; urgency=medium
 

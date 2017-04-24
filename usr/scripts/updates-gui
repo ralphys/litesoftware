@@ -184,7 +184,7 @@ Go to https://www.linuxliteos.com/forums/ and paste the log below into a new or 
        exit 0
     fi
 
-    PROCEED=$(zenity --question --width="300" --height="80" --title="  $_APPNAME" --window-icon="$_ICON" --text="\n$_APPNAME completed successfully!\n\nWould you like to view the $_APPNAME log?" 2>/dev/null ; echo $?)
+    PROCEED=$(zenity --question --width="300" --height="80" --title="  $_APPNAME" --window-icon="$_ICON" --text="\n$_APPNAME completed successfully.\n\nWould you like to view the $_APPNAME log?" 2>/dev/null ; echo $?)
     if [ ${PROCEED} -eq 1 ]; then rm_temp_files; :; else
       zenity --text-info --width="750" --height="400" --cancel-label="Quit" --ok-label="Save..." --title="  $_APPNAME - Log" --filename="$_LLUPDATES" 2>/dev/null
         if [ $? -eq 0 ]; then
@@ -195,7 +195,7 @@ Go to https://www.linuxliteos.com/forums/ and paste the log below into a new or 
         fi
     fi
     if [ -s /var/run/reboot-required ]; then
-        zenity --question --width="300" --height="100" --ok-label="Reboot now !" --cancel-label="Continue using my system" --title=" $_APPNAME - Reboot required" \
+        zenity --question --width="300" --height="100" --ok-label="Reboot now" --cancel-label="Continue using my system" --title=" $_APPNAME - Reboot required" \
                --text="\nPrevious updates require rebooting the system for changes to take effect.\n\n          Would you like to reboot now?" 2>/dev/null
         if [ "$?" -eq "0" ]; then reboot; else exit 0 ; fi
     fi
