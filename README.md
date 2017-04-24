@@ -20,6 +20,28 @@ This project is under the GPLv2 license. Unless otherwise stated in individual f
 - Linux Lite Desktop start up sound
 - Menu, Internet, Support link
 
+![](http://imgur.com/l4pp0uc.png)
+
+![](http://imgur.com/ikWotKx.png)
+
+![](http://imgur.com/mzCd1gU.png)
+
+![](http://imgur.com/b3asIo8.png)
+
+![](http://imgur.com/7j6m908.png)
+
+![](http://imgur.com/g2HfAFx.png)
+
+![](http://imgur.com/Ajn7H6M.png)
+
+![](http://imgur.com/Jq2wtNn.png)
+
+![](http://imgur.com/nLGd0bE.png)
+
+![](http://imgur.com/qCdQ1kG.png)
+
+![](http://imgur.com/KLGKnXG.png)
+
 ## Authors
 - [Jerry Bezencon](https://github.com/linuxlite/)
 - [Ralphy](https://github.com/ralphys)
