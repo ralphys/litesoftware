@@ -13,27 +13,33 @@ test -e ["/etc/apt/apt.conf.d/20auto-upgrades.ucf-dist"] || rm -rf /etc/apt/apt.
 # File ownership
 chown root:root /boot/startupsound.wav
 chown root:root /etc/apt/apt.conf.d/local
-chown root:root /usr/share/applications/* -R
-chown root:root /usr/share/icons/* -R
+chown root:root /etc/skel -R
 chown root:root /usr/bin/lite-software
+chown root:root /usr/share/applications/* -R
+chown root:root /usr/share/liteappsicons -R
+chown root:root /usr/share/icons/* -R
+chown root:root /usr/scripts -R
 chown root:root /usr/share/lightdm/lightdm.conf.d/50-linuxlite.conf
+
 # File permissions
 chmod 644 /boot/startupsound.wav
 chmod 644 /etc/apt/apt.conf.d/local
 chmod 644 /usr/share/lightdm/lightdm.conf.d/50-linuxlite.conf
+chmod 755 /usr/scripts -R
 
 # Folders and files permissions
-chown root:root /usr/scripts -R
-chmod 755 /usr/scripts -R
-chown root:root /usr/share/liteappsicons -R
+## /usr/share/liteappsicons
 find /usr/share/liteappsicons -type d -exec chmod 755 {} \;
 find /usr/share/liteappsicons -type f -exec chmod 644 {} \;
-find /usr/share/applications/ -type f -exec chmod 644 {} \;
-find /usr/share/icons/ -type d -exec chmod 755 {} \;
-find /usr/share/icons/ -type f -exec chmod 644 {} \;
 
-# This folder MUST have correct permissions for systems with multiple accounts
-chown root:root /etc/skel -R
+## /usr/share/icons/Faenza(-Dark)
+find /usr/share/icons/Faenza* -type d -exec chmod 755 {} \;
+find /usr/share/icons/Faenza* -type f -exec chmod 644 {} \;
+
+# /usr/share/applications - needs optimization
+find /usr/share/applications/ -type f -exec chmod 644 {} \;
+
+## folder MUST have correct permissions for systems with multiple accounts
 find /etc/skel -type d -exec chmod 755 {} \;
 find /etc/skel -type f -exec chmod 644 {} \;
 
