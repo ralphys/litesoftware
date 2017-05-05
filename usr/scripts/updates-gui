@@ -90,7 +90,7 @@ Install Updates could not fetch the package cache information lists.\
 Go to https://www.linuxliteos.com/forums/ and paste the log below into a new or existing thread for assistance.\n\
 ============ Log ===========\n' "$_LLUPDATES"
         sleep 4 | zenity --progress --pulsate --window-icon="error" --auto-close --no-cancel --width="380" --height="80" --title="$_APPNAME - Error" \
-                         --text="Errors occurred while fetching packages cache information lists.\n✔ Retrieving errors log, please wait..." 2>/dev/null
+                         --text="Errors occurred while fetching packages cache information lists.\n✔ Retrieving error log, please wait..." 2>/dev/null
         view_save_log; exit 1
     fi
   unset APTUPDATE
