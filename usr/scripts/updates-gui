@@ -26,6 +26,26 @@ rm -f $_PLAIN
 rm -f /tmp/updateslist.*
 }
 
+# function view, save update log
+view_save_log() {
+  _ANS=$(zenity --text-info --width="780" --height="400" --title=" $_APPNAME - Error log" \
+                --extra-button="Copy to clipboard" --ok-label="Save..." --cancel-label="Quit" --filename="$_LLUPDATES" 2>/dev/null); _OPT=$(echo $?)
+    if [[ "$_ANS" =~ "Copy to clipboard" ]]; then
+      sudo -u ${SUDO_USER:-$_SVUSER} xclip -selection c "$_LLUPDATES"
+      xhost local:$_SVUSER > /dev/null 2>&1
+      export DISPLAY=:0
+      _NTFYICON="/usr/share/icons/Faenza/places/48/distributor-logo-ubuntu.png"
+      notify-send -i "$_NTFYICON" 'Updates Log copied to clipboard' "Go to www.linuxliteos.com/forums and paste the log into a new or existing thread." -t 10000
+      xhost - >/dev/null 2>&1; rm_temp_files; exit 0
+    fi
+    case $_OPT in
+       0) szSavePath=$(zenity --title="    Save Updates Log" --width="550" --height="380" --file-selection --filename="/home/$_SVUSER/llupdates.log" \
+                              --window-icon="$_ICON" --file-filter='*.log' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
+           if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp "$_LLUPDATES" "$szSavePath"; rm_temp_files; else rm_temp_files; exit 0 ; fi ;;
+       1) rm_temp_files; exit 0 ;;
+    esac
+}
+
 # Check Internet access
 if eval "curl -sk google.com" >> /dev/null 2>&1; then :; else # Prompt ERROR internet connection check failed and exit
   zenity --info --width="320" --height="120" --ok-label="Close" --title="  $_APPNAME" \
@@ -53,14 +73,25 @@ if [ "$?" -eq "0" ];then
     apt-get install xclip -y | zenity  --progress --pulsate --window-icon="$_ICON" --auto-close --no-cancel --width="320" --height="80" --title="$_APPNAME" \
                                        --text="Preparing... please wait..." 2>/dev/null
   fi
-APTUPDATE=$(grep '^deb' -c /etc/apt/sources.list) # Total of repositories registered, this is approximated
-apt-get update 2>&1 | awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (1000*count/total);print (percentage < 90?percentage:99),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
-  | zenity --progress --width="600" --text="Updating package lists..." --window-icon="$_ICON" --title="Updating Software Sources - please wait..." --percentage="0" --no-cancel --pulsate --auto-close 2>/dev/null
+
+# Repositories registered
+_SLIST=$(grep '^deb ' -c /etc/apt/sources.list)
+_SLISTD=$(grep -R --exclude="*.save" '^deb ' -c /etc/apt/sources.list.d/ | grep -c /)
+APTUPDATE=$(($_SLIST + $_SLISTD)) # Total of repositories registered, this is approximated
+apt-get update 2>&1 | tee "$_LLUPDATES" |
+awk -v total=$APTUPDATE '/^Ign|^ Get/{count++;$1=""} FNR { if (total != 0){percentage=int (1000*count/total);print (percentage < 90?percentage:99),"\n#",substr($0, 0, 128) }; fflush(stdout)}' \
+| zenity --progress --width="600" --text="Updating package lists..." --window-icon="$_ICON" --title="Updating Software Sources - please wait..." --percentage="0" --no-cancel --pulsate --auto-close 2>/dev/null
     if [ "${PIPESTATUS[0]}" -ne "0" ]; then
         unset APTUPDATE; rm_temp_files; unset _UPDATES
-        zenity --error --width="290" --height="60" --title="  $_APPNAME - Error" \
-               --text="\n$_APPNAME couldn't fetch the package cache information lists.\n\nCannot check for updates!" 2>/dev/null
-        exit 1
+        sed -i '1 i\===========================\
+Install Updates Error log\
+===========================\
+Install Updates could not fetch the package cache information lists.\
+Go to https://www.linuxliteos.com/forums/ and paste the log below into a new or existing thread for assistance.\n\
+============ Log ===========\n' "$_LLUPDATES"
+        sleep 4 | zenity --progress --pulsate --window-icon="error" --auto-close --no-cancel --width="380" --height="80" --title="$_APPNAME - Error" \
+                         --text="Errors occurred while fetching packages cache information lists.\n✔ Retrieving errors log, please wait..." 2>/dev/null
+        view_save_log; exit 1
     fi
   unset APTUPDATE
 
@@ -143,7 +174,7 @@ zenity --text-info --window-icon="$_ICON" --ok-label="Update Now" --cancel-label
         rm $_UPDATES; unset _UPDATES
 
 #Begin upgrade
-DEBIAN_FRONTEND=noninteractive apt-get  -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y  2>&1 | tee "$_LLUPDATES" |
+DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade -y  2>&1 | tee "$_LLUPDATES" |
 awk ' BEGIN { FS=" "; total=1;end_download=0} /upgraded/ {total= $1 + $3;FS="[ :]" } /^Get:[[:digit:]]+/ {printf "#Downloading %s %s %s\n",$7,$(NF-1),$NF;print int(($2 - 1) * 100 / total);
 fflush(stdout)} /^\(Reading / {if (end_download==0){print 100;fflush(stdout);end_download=1}} /^(Preparing|Unpacking|Selecting|Processing|Setting|Download)/ {print "#", substr($0, 0, 128); fflush(stdout)}' \
   | ( zenity --progress --width="600" --window-icon="$_ICON" --percentage="0" --no-cancel --auto-close --title="Downloading - please wait..." --text="Downloading package(s)...\nThis may take a while."  2>/dev/null;
@@ -158,23 +189,7 @@ Go to https://www.linuxliteos.com/forums/ and paste the log below into a new or 
 ============ Log ===========\n' "$_LLUPDATES"
       sleep 4 | zenity --progress --pulsate --window-icon="error" --auto-close --no-cancel --width="320" --height="80" --title="$_APPNAME - Error" \
                        --text="Errors occurred while updating. \n✔ Retrieving errors log. Please wait..." 2>/dev/null
-      _ANS=$(zenity --text-info --width="780" --height="400" --title=" $_APPNAME - Error log" \
-                    --extra-button="Copy to clipboard" --ok-label="Save..." --cancel-label="Quit" --filename="$_LLUPDATES" 2>/dev/null); _OPT=$(echo $?)
-      if [[ "$_ANS" =~ "Copy to clipboard" ]]; then
-        sudo -u ${SUDO_USER:-$_SVUSER} xclip -selection c "$_LLUPDATES"
-        xhost local:$_SVUSER > /dev/null 2>&1
-        export DISPLAY=:0
-        _NTFYICON="/usr/share/icons/Faenza/places/48/distributor-logo-ubuntu.png"
-        notify-send -i "$_NTFYICON" 'Updates Log copied to clipboard' "Go to www.linuxliteos.com/forums and paste the log into a new or existing thread." -t 10000
-        xhost - >/dev/null 2>&1; rm_temp_files; exit 0
-      fi
-    case $_OPT in
-      0) szSavePath=$(zenity --title="    Save Updates Log" --width="550" --height="380" --file-selection --filename="/home/$_SVUSER/llupdates.log" \
-                             --window-icon="$_ICON" --file-filter='*.log' --file-filter='All files | *' --save --confirm-overwrite 2>/dev/null)
-          if [ "$?" -eq "0" ]; then sudo -u ${SUDO_USER:-$_SVUSER} cp "$_LLUPDATES" "$szSavePath"; rm_temp_files; else rm_temp_files; exit 0 ; fi ;;
-      1) rm_temp_files; exit 0 ;;
-    esac
-    exit 0
+      view_save_log; exit 0
     fi
 
     # Halt updates script if user selects Cancel
