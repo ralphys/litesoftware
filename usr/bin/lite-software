@@ -229,8 +229,8 @@ install_menu() {
   done
   IFS=$OIFS
 
-  zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Install" \
-         --text="\nThe following software has been selected:<b>\n\n "$PKGS_NAMES" </b>\nDo you want to proceed with the installation?" 2>/dev/null
+  zenity --question --width="300" --window-icon="$_ICON" --title="  $_APPNAME - Install" \
+         --text="\nThe following software has been selected:<b>\n\n ${PKGS_NAMES} </b>\nDo you want to proceed with the installation?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
     install_pkgs PKGS[@]; return; else continue
   fi
@@ -281,8 +281,8 @@ remove_menu() {
     PKGS=$PKGS${selection_array[$i]}" "
   done
   IFS=$OIFS
-  zenity --question --width="360" --window-icon="$_ICON" --title="  $_APPNAME - Remove" \
-         --text="\nThe following software has been selected:<b>\n\n "$PKGS_NAMES" </b>\n Do you want to proceed  with the removal?" 2>/dev/null
+  zenity --question --width="300" --window-icon="$_ICON" --title="  $_APPNAME - Remove" \
+         --text="\nThe following software has been selected:<b>\n\n ${PKGS_NAMES} </b>\n Do you want to proceed  with the removal?" 2>/dev/null
   if [ "$?" -eq "0" ]; then
     remove_pkgs PKGS[@]; return; else continue
   fi
