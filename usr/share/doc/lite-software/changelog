@@ -1,10 +1,17 @@
-lite-software (2.0-0370-linuxlite) citrine; urgency=high
+lite-software (2.0-0400-linuxlite) citrine; urgency=medium
+
+  * placeholder
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 07 May 2017 00:31:28 +1200
+
+lite-software (2.0-0390-linuxlite) citrine; urgency=high
 
   * Fix app name listing in confirmation dialog (Lite Software)
   * Adjust install and remove confirmation dialogs size (Lite Software)
-  * Show progress when updating netbios name in samba configuration ( Network Share Settings)
+  * Show progress when updating netbios name in samba configuration (Network Share Settings)
+  * Optimize postinst (Lite Software)
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 24 Apr 2017 18:35:06 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 07 May 2017 00:31:28 +1200
 
 lite-software (2.0-0380-linuxlite) citrine; urgency=medium
 
