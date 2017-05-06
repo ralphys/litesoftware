@@ -1,6 +1,8 @@
 lite-software (2.0-0370-linuxlite) citrine; urgency=high
 
-  * placeholder
+  * Fix app name listing in confirmation dialog (Lite Software)
+  * Adjust install and remove confirmation dialogs size (Lite Software)
+  * Show progress when updating netbios name in samba configuration ( Network Share Settings)
 
  -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 24 Apr 2017 18:35:06 +1200
 
