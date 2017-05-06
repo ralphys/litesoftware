@@ -17,8 +17,8 @@ if ! [ -f "$SMBCONF.bak" ]; then cp $SMBCONF $SMBCONF.bak; fi
 # set netbios name to hostname in smb.conf
 cat "$SMBCONF" | grep -Fx "netbios name = $host" > /dev/null
 if [[ $? -eq 0 ]]; then :; else
-   zenity --progress --title="$APPNAME" --text="Updating Samba netbios name. Please wait..." --pulsate --no-cancel --width="340" --timeout="4"
-   sed -i "s/netbios name =.*/netbios name = $host/" $SMBCONF
+  sed -i "s/netbios name =.*/netbios name = $host/" $SMBCONF
+  sleep 3 | zenity --progress --title="$APPNAME" --text="Updating Samba netbios name. Please wait..." --pulsate --no-cancel --width="340" --auto-close
 fi
 # add firewall rule
 sudo ufw allow Samba > /dev/null & 2>&1
