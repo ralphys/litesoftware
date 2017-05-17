@@ -84,6 +84,7 @@ soft_list=(audacity
   playonlinux
   remote
   extras
+  shotwell
   skype
   spotify
   steam
@@ -112,6 +113,7 @@ pinta=("$APPICON/pinta.png" "Pinta" "Graphics" "" "An easy to use drawing progra
 playonlinux=("$APPICON/playonlinux.png" "PlayOnLinux" "Cross Platform" "" "Use numerous games and apps designed to run with Windows" "playonlinux" "" )
 remote=("$APPICON/remmina.png" "Remote Desktop Software" "Internet" "" "Remmina Remote Desktop Client for Windows (RDP) and VNC Servers" "remmina" "" )
 extras=("$APPICON/extras.png" "Restricted Extras" "Multimedia" "" "Additional codecs and useful file formats (highly recommended)" "ubuntu-restricted-extras" "libavcodec-extra" )
+shotwell=("$APPICON/shotwell.png" "Shotwell" "Image Organizer" "" "An image organizer designed to provide personal photo management" "shotwell" "" )
 skype=("$APPICON/skype.png" "Skype" "Internet" "" "A popular audio and video chat application" "skype-bin" "skype" )
 spotify=("$APPICON/spotify.png" "Spotify" "Multimedia" "" "A digital music service" "spotify-client" "" )
 steam=("$APPICON/steam.png" "Steam" "Games" "" "A cross platform gaming client" "steam-launcher" "" )
