@@ -1,3 +1,9 @@
+lite-software (2.0-0410-linuxlite) citrine; urgency=medium
+
+  * Updated Skype for Linux to version 5.x
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Wed, 7 Jun 2017 01:13:25 +1200
+
 lite-software (2.0-0400-linuxlite) citrine; urgency=medium
 
   * Added Shotwell Photo Manager to Lite Software list
