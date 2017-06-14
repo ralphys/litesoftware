@@ -1,8 +1,26 @@
-lite-software (2.0-0400-linuxlite) citrine; urgency=medium
+lite-software (2.0-0430-linuxlite) citrine; urgency=medium
 
   * placeholder
 
- -- Jerry Bezencon <valtam@linuxliteos.com>  Sun, 07 May 2017 00:31:28 +1200
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 7 Jun 2017 02:42:02 +1200
+
+lite-software (2.0-0420-linuxlite) citrine; urgency=medium
+
+  * Added Skype for Linux Signed Key check
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Mon, 7 Jun 2017 02:42:02 +1200
+
+lite-software (2.0-0410-linuxlite) citrine; urgency=medium
+
+  * Updated Skype for Linux to version 5.x
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Wed, 7 Jun 2017 01:13:25 +1200
+
+lite-software (2.0-0400-linuxlite) citrine; urgency=medium
+
+  * Added Shotwell Photo Manager to Lite Software list
+
+ -- Jerry Bezencon <valtam@linuxliteos.com>  Wed, 17 May 2017 18:02:07 +1200
 
 lite-software (2.0-0390-linuxlite) citrine; urgency=high
 

@@ -59,3 +59,8 @@ else :; fi
 
 # Remove old files if exist
 if [ -d "/usr/share/litesoftware" ]; then rm -rf /usr/share/litesoftware; fi
+
+# Add Skype for Linux Signed Key
+if [ -f "/usr/bin/skypeforlinux" ]; then
+curl https://repo.skype.com/data/SKYPE-GPG-KEY | sudo apt-key add -;
+else :; fi

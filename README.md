@@ -5,7 +5,7 @@ A gui tool to easily install and remove popular software.
 
 ![](http://i.imgur.com/OtAawni.png)
 
-![](http://i.imgur.com/41Q1avt.png)
+![](http://imgur.com/9ooxPFD.png)
 
 ## License ![License](https://img.shields.io/badge/license-GPLv2-green.svg)
 
